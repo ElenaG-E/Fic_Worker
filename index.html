@@ -137,7 +137,7 @@
                         Paso 1: 📚 Cargar Contexto (Opcional)
                     </h2>
                     <label for="pdfUpload" class="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">
-                        Sube tus PDFs (capítulos anteriores, lore, etc.) para que la IA los use.
+                        Sube tus PDFs. Puedes seleccionar varios a la vez (con Ctrl+Clic) o añadirlos uno por uno.
                     </label>
                     <input type="file" id="pdfUpload" accept=".pdf" class="block w-full text-sm text-gray-500 dark:text-gray-400
                         file:mr-4 file:py-2 file:px-4
@@ -147,7 +147,7 @@
                         hover:file:bg-primary-700
                         cursor-pointer transition duration-200" multiple/>
                     <div id="pdfStatus" class="mt-3 text-sm text-gray-500 dark:text-gray-500">
-                        Aún no has subido ningún PDF.
+                        Añade uno o más PDFs. Los archivos se acumularán.
                     </div>
                 </div>
 
@@ -508,14 +508,18 @@
                 }
                 
                 if (newFilesProcessed === 0 && files.length > 0) {
-                    pdfStatus.textContent = `Archivos ya cargados. Total: ${loadedFileNames.size} archivos (${totalPagesProcessed} páginas).`;
+                    pdfStatus.textContent = `Archivos ya cargados. Sigue añadiendo si lo deseas.`;
                 } else {
-                    pdfStatus.textContent = `Carga exitosa. Total: ${loadedFileNames.size} archivos cargados (${totalPagesProcessed} páginas).`;
+                    // CON ESTO QUEDA MÁS CLARO
+                    const fileList = Array.from(loadedFileNames).join(', ');
+                    pdfStatus.innerHTML = `
+                        <strong class="text-green-400">¡Archivos cargados con éxito!</strong><br>
+                        Total: ${loadedFileNames.size} archivos (${totalPagesProcessed} páginas).<br>
+                        <span class="text-xs text-gray-400">Archivos: ${fileList}</span>
+                    `;
                 }
                 
-                pdfStatus.className = "mt-3 text-sm text-green-400";
-                generateButton.disabled = false;
-                buttonText.textContent = "Generar Capítulo";
+                pdfStatus.className = "mt-3 text-sm"; // Quitamos la clase de color base
 
             } catch (err) {
                 console.error("Error al procesar PDF:", err);
