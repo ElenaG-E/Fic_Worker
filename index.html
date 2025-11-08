@@ -22,7 +22,6 @@
                     fontFamily: {
                         sans: ['Inter', 'sans-serif'],
                     },
-                    // Paleta de colores "Sky" (Celeste)
                     colors: {
                         primary: {
                             400: '#7dd3fc', // sky-400
@@ -31,7 +30,6 @@
                             700: '#0284c7', // sky-700
                         }
                     },
-                    // Bordes más redondeados
                     borderRadius: {
                         '3xl': '1.5rem',
                     },
@@ -45,7 +43,7 @@
                                 code: { color: theme('colors.pink.400') },
                                 blockquote: {
                                     color: theme('colors.gray.400'),
-                                    borderLeftColor: theme('colors.primary.500'), // Usa el nuevo color
+                                    borderLeftColor: theme('colors.primary.500'),
                                 },
                             },
                         },
@@ -69,21 +67,15 @@
     
     <style>
         body { font-family: 'Inter', sans-serif; overscroll-behavior: none; }
-        
-        /* Nuevos estilos de formulario usando los colores "primary" de Tailwind */
         .form-input {
             @apply w-full p-3 bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg shadow-inner text-gray-900 dark:text-gray-300 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition duration-200;
         }
         .form-select {
             @apply w-full p-3 bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg shadow-inner text-gray-900 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition duration-200;
         }
-        
-        /* Tarjetas con bordes más redondeados */
         .card {
             @apply bg-white dark:bg-gray-900 shadow-xl rounded-3xl ring-1 ring-gray-900/5 dark:ring-gray-800 transition-all;
         }
-        
-        /* Botones con estilos mejorados */
         .btn {
             @apply w-full font-bold py-3 px-6 rounded-lg shadow-lg hover:shadow-xl text-lg flex items-center justify-center transform hover:-translate-y-0.5 transition-all duration-200;
         }
@@ -91,23 +83,17 @@
         .btn-pink { @apply bg-pink-600 text-white hover:bg-pink-700 hover:shadow-pink-500/50; }
         .btn-primary { @apply bg-primary-600 text-white hover:bg-primary-700 hover:shadow-primary-500/50; }
         .btn-yellow { @apply bg-yellow-500 text-white hover:bg-yellow-600 hover:shadow-yellow-500/50; }
-        
         .btn-tool {
              @apply w-full font-semibold py-2 px-4 rounded-lg shadow-md hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-200;
         }
-        /* Herramientas con colores más variados y amigables */
         .btn-tool-indigo { @apply bg-indigo-500 text-white hover:bg-indigo-600 hover:shadow-indigo-500/50; }
         .btn-tool-blue { @apply bg-blue-500 text-white hover:bg-blue-600 hover:shadow-blue-500/50; }
         .btn-tool-teal { @apply bg-teal-500 text-white hover:bg-teal-600 hover:shadow-teal-500/50; }
         .btn-tool-purple { @apply bg-purple-500 text-white hover:bg-purple-600 hover:shadow-purple-500/50; }
         .btn-tool-orange { @apply bg-orange-500 text-white hover:bg-orange-600 hover:shadow-orange-500/50; }
-
-        /* Estilos del Loader (Sin cambios) */
-         #storyOutput { min-height: 400px; max-height: 70vh; overflow-y: auto; }
-        .loader { border-top-color: #0ea5e9; /* Color primario celeste */ animation: spin 1s linear infinite; }
+        #storyOutput { min-height: 400px; max-height: 70vh; overflow-y: auto; }
+        .loader { border-top-color: #0ea5e9; animation: spin 1s linear infinite; }
         @keyframes spin { to { transform: rotate(360deg); } }
-        
-        /* Estilos del Storybook (Sin cambios) */
         #storybookContent { scroll-snap-type: y mandatory; overflow-y: scroll; height: 70vh; }
         .storybook-page { scroll-snap-align: start; flex-shrink: 0; height: 100%; }
         #storybookContent::-webkit-scrollbar { display: none; }
@@ -122,6 +108,7 @@
                 <span class="bg-clip-text text-transparent bg-gradient-to-r from-sky-400 to-cyan-400">
                     Fic Writer Pro
                 </span>
+                <span class="text-lg font-normal text-gray-400">v1.1</span>
             </h1>
             <p class="text-lg text-center text-gray-500 dark:text-gray-400">
                 Tu asistente de IA para crear increíbles historias y fanfics.
@@ -321,17 +308,13 @@
     <div id="profileModal" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center p-4 hidden z-50">
         <div class="card max-w-2xl w-full p-6 max-h-[80vh] flex flex-col">
             <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-4">👤 Generador de Perfil de Personaje</h2>
-            
             <label for="characterNameInput" class="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">Nombre del Personaje</LAbel>
             <input type="text" id="characterNameInput" placeholder="Ej: 'Elara' o 'El Inquisidor'" class="form-input mb-4">
-            
             <button id="runProfileGeneration" class="btn-tool btn-tool-blue mb-4">
                 Generar Perfil
             </button>
-
             <div id="profileOutput" class="flex-grow overflow-y-auto bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-lg p-4 text-gray-700 dark:text-gray-300 min-h-[200px]">
             </div>
-
             <button id="closeProfileModal" class="mt-4 btn-tool bg-gray-600 text-white hover:bg-gray-700 self-end">
                 Cerrar
             </button>
@@ -341,23 +324,17 @@
     <div id="dialogueModal" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center p-4 hidden z-50">
         <div class="card max-w-2xl w-full p-6 max-h-[80vh] flex flex-col">
             <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-4">💬 Ayudante de Diálogo</h2>
-            
             <label for="charAInput" class="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">Personaje A</LAbel>
             <input type="text" id="charAInput" placeholder="Ej: 'Elara'" class="form-input mb-2">
-
             <label for="charBInput" class="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">Personaje B</label>
             <input type="text" id="charBInput" placeholder="Ej: 'Inquisidor'" class="form-input mb-4">
-
             <label for="sceneContextInput" class="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">Contexto de la Escena</label>
             <textarea id="sceneContextInput" class="form-input" rows="3" placeholder="Ej: Discuten sobre el artefacto robado en el sótano..."></textarea>
-            
             <button id="runDialogueGeneration" class="btn-tool btn-tool-teal my-4">
                 Generar Diálogo
             </button>
-
             <div id="dialogueOutput" class="flex-grow overflow-y-auto bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-lg p-4 text-gray-700 dark:text-gray-300 min-h-[200px]">
             </div>
-
             <button id="closeDialogueModal" class="mt-4 btn-tool bg-gray-600 text-white hover:bg-gray-700 self-end">
                 Cerrar
             </button>
@@ -378,17 +355,13 @@
     <div id="queryPdfModal" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center p-4 hidden z-50">
         <div class="card max-w-2xl w-full p-6 max-h-[80vh] flex flex-col">
             <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-4">🔍 Consultar PDF</h2>
-            
             <label for="queryPdfInput" class="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">Tu Pregunta sobre el PDF</label>
             <input type="text" id="queryPdfInput" placeholder="Ej: ¿Cuál es el nombre del capitán?" class="form-input mb-4">
-            
             <button id="runQueryPdfGeneration" class="btn-tool btn-tool-orange mb-4">
                 Preguntar
             </button>
-
             <div id="queryPdfOutput" class="flex-grow overflow-y-auto bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-lg p-4 text-gray-700 dark:text-gray-300 min-h-[150px]">
             </div>
-
             <button id="closeQueryPdfModal" class="mt-4 btn-tool bg-gray-600 text-white hover:bg-gray-700 self-end">
                 Cerrar
             </button>
@@ -402,7 +375,7 @@
                 <button id="closeStorybookModal" class="text-gray-400 hover:text-gray-900 dark:hover:text-white text-3xl transition duration-200">&times;</button>
             </div>
             <div id="storybookContent" class="flex-grow overflow-y-auto" style="scroll-snap-type: y mandatory; height: 75vh;">
-                </div>
+            </div>
             <div id="storybookStatus" class="p-4 text-center text-gray-500 border-t border-gray-200 dark:border-gray-700">
             </div>
         </div>
@@ -424,11 +397,9 @@
         }
         // --- FIN: REGISTRO DEL SERVICE WORKER ---
 
-        // Variables globales
         let globalPdfContext = "";
         let loadedFileNames = new Set();
         let totalPagesProcessed = 0;
-
         const pdfUpload = document.getElementById('pdfUpload');
         const pdfStatus = document.getElementById('pdfStatus');
         const promptEditor = document.getElementById('promptEditor');
@@ -450,11 +421,8 @@
         const imagenApiUrl = `https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-002:predict?key=${apiKey}`;
         const ttsApiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-tts:generateContent?key=${apiKey}`;
 
-
         pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
 
-        // --- Funciones de Conteo de Palabras ---
-        
         function countWords(text) {
             if (!text) return 0;
             return text.trim().split(/\s+/).filter(Boolean).length;
@@ -469,8 +437,6 @@
             const count = countWords(storyOutput.textContent);
             outputWordCount.textContent = `Palabras: ${count}`;
         }
-
-        // --- Lógica de Carga de PDF (Ajustada) ---
 
         pdfUpload.addEventListener('change', handlePdfUpload);
 
@@ -507,10 +473,11 @@
                     newPagesRead += numPages;
                 }
                 
+                // --- CORRECCIÓN DE LA INTERFAZ ---
+                // Muestra la lista de todos los archivos cargados
                 if (newFilesProcessed === 0 && files.length > 0) {
                     pdfStatus.textContent = `Archivos ya cargados. Sigue añadiendo si lo deseas.`;
                 } else {
-                    // CON ESTO QUEDA MÁS CLARO
                     const fileList = Array.from(loadedFileNames).join(', ');
                     pdfStatus.innerHTML = `
                         <strong class="text-green-400">¡Archivos cargados con éxito!</strong><br>
@@ -518,8 +485,11 @@
                         <span class="text-xs text-gray-400">Archivos: ${fileList}</span>
                     `;
                 }
+                pdfStatus.className = "mt-3 text-sm"; // Quitar clases de color conflictivas
+                // --- FIN DE LA CORRECCIÓN ---
                 
-                pdfStatus.className = "mt-3 text-sm"; // Quitamos la clase de color base
+                generateButton.disabled = false;
+                buttonText.textContent = "Generar Capítulo";
 
             } catch (err) {
                 console.error("Error al procesar PDF:", err);
@@ -559,7 +529,7 @@
             });
         }
 
-        // --- Lógica de Generación de Historia ---
+        // --- Lógica de Generación de Historia (sin cambios) ---
 
         generateButton.addEventListener('click', handleStoryGeneration);
         continueButton.addEventListener('click', handleStoryContinuation);
@@ -632,16 +602,12 @@
         async function handleStoryContinuation() {
             const currentStory = storyOutput.textContent;
             const originalPrompt = promptEditor.value;
-
             if (!currentStory) return;
-
             setLoading(true);
-
             const storyGenre = document.getElementById('storyGenre').value;
             const storyTone = document.getElementById('storyTone').value;
             const storyLanguage = document.getElementById('storyLanguage').value;
             const storyNarrator = document.getElementById('storyNarrator').value;
-            
             let contextForModel = "";
             let contextRules = "";
 
@@ -660,14 +626,12 @@
             2.  **Parámetros:** Sigue los parámetros de la historia (tono, género, etc.).
             3.  **Longitud:** Escribe la *siguiente parte* de la historia, añadiendo un fragmento sustancial (aprox. 1000-1500 palabras).
             4.  **Formato:** Responde únicamente con el *nuevo* texto de la historia. No repitas la parte anterior. No incluyas saludos ni preámbulos.
-            
             - Género: ${storyGenre}
             - Tono: ${storyTone}
-            - Tipo de Lenguaje: ${storyLanguage}
+            - Tipo de Lengáuaje: ${storyLanguage}
             - Narrador: ${storyNarrator}
             ${contextRules}
             `;
-            
             const userPrompt = `PROMPT ORIGINAL (para referencia): ${originalPrompt}\n\n--- HISTORIA HASTA AHORA (ÚLTIMA PARTE) ---\n${currentStory.substring(currentStory.length - 10000)}\n\n--- FIN HISTORIA HASTA AHORA ---\n\nINSTRUCCIÓN: Por favor, continúa escribiendo la historia desde donde se quedó. No repitas nada de lo anterior. Escribe el siguiente fragmento.`;
 
             try {
@@ -681,25 +645,20 @@
                 }
                 displayError(friendlyErrorMessage, true);
             }
-            
             setLoading(false);
         }
 
         async function callGeminiAPI(systemPrompt, userPromptText) {
-            
             if (!apiKey || apiKey === "") {
                  throw new Error("Clave de API no configurada. Por favor, edita el archivo index.html y pega tu API Key.");
             }
-
             const payload = {
                 systemInstruction: { parts: [{ text: systemPrompt }] },
                 contents: [{ parts: [{ text: userPromptText }] }],
             };
-
             let response;
             let retries = 3;
             let delay = 1000;
-
             for (let i = 0; i < retries; i++) {
                 try {
                     response = await fetch(geminiApiUrl, {
@@ -707,7 +666,6 @@
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify(payload)
                     });
-
                     if (!response.ok) { 
                         let errorText = `Error en la API: ${response.status} ${response.statusText}`;
                         try {
@@ -716,25 +674,20 @@
                         } catch (e) { }
                         throw new Error(errorText);
                     }
-
                     const result = await response.json();
                     const text = result.candidates?.[0]?.content?.parts?.[0]?.text;
                     if (text) {
                         return text;
                     }
-
                     const finishReason = result.candidates?.[0]?.finishReason;
                     console.warn(`La generación de texto falló. Razón: ${finishReason}`);
-
                     if (finishReason === 'SAFETY') {
                         throw new Error("La respuesta fue bloqueada por los filtros de seguridad de la IA. Intenta reformular el prompt.");
                     }
                     if (finishReason === 'RECITATION') {
                         throw new Error("La respuesta fue bloqueada por recitación (demasiado similar a los datos de entrenamiento).");
                     }
-                    
                     throw new Error(`Respuesta inesperada de la IA (Razón: ${finishReason || 'Desconocida'}).`);
-
                 } catch (error) {
                     console.warn(`Intento ${i + 1} fallido. Reintentando en ${delay}ms...`, error);
                     if (i < retries - 1) {
@@ -747,8 +700,7 @@
             }
         }
 
-
-        // --- Lógica de Herramientas de IA ---
+        // --- Lógica de Herramientas de IA (sin cambios) ---
         
         const twistModal = document.getElementById('twistModal');
         const closeTwistModal = document.getElementById('closeTwistModal');
@@ -778,7 +730,6 @@
         const closeQueryPdfModal = document.getElementById('closeQueryPdfModal');
         const queryPdfInput = document.getElementById('queryPdfInput');
         const runQueryPdfGeneration = document.getElementById('runQueryPdfGeneration');
-
         generateTwistButton.addEventListener('click', handleTwistGeneration);
         closeTwistModal.addEventListener('click', () => twistModal.classList.add('hidden'));
         generateProfileButton.addEventListener('click', () => profileModal.classList.remove('hidden'));
@@ -793,7 +744,6 @@
         closeQueryPdfModal.addEventListener('click', () => queryPdfModal.classList.add('hidden'));
         runQueryPdfGeneration.addEventListener('click', handleQueryPdfGeneration);
 
-
         async function handleTwistGeneration() {
             if (!promptEditor.value) {
                 alert("Por favor, escribe un prompt primero.");
@@ -801,7 +751,6 @@
             }
             twistModal.classList.remove('hidden');
             twistOutput.innerHTML = getLoaderHTML("Buscando giros interesantes...");
-
             let contextRules = "";
             if (globalPdfContext) {
                 contextRules = `
@@ -810,7 +759,6 @@
                 --- FIN DEL CONTEXTO ---
                 `;
             }
-
             const systemPrompt = `Eres un editor de ficción creativo. Tu trabajo es sugerir giros de trama inesperados y emocionantes.
             Basándote en el PROMPT de la escena del usuario (y el CONTEXTO, si se proporcionó), genera 3 a 5 sugerencias de giros de trama.
             Haz que sean concisos y provocativos.
@@ -834,7 +782,6 @@
                 twistOutput.innerHTML = `<p class="text-red-400">${friendlyErrorMessage}</p>`;
             }
         }
-
         async function handleProfileGeneration() {
             const characterName = characterNameInput.value;
             if (!characterName) {
@@ -870,7 +817,6 @@
                 profileOutput.innerHTML = `<p class="text-red-400">${friendlyErrorMessage}</p>`;
             }
         }
-
         async function handleDialogueGeneration() {
             const charA = charAInput.value;
             const charB = charBInput.value;
@@ -907,7 +853,6 @@
                 dialogueOutput.innerHTML = `<p class="text-red-400">${friendlyErrorMessage}</p>`;
             }
         }
-
         async function handleCritiqueGeneration() {
             const currentStory = storyOutput.textContent;
             if (!currentStory || outputPlaceholder.style.display !== 'none') {
@@ -936,7 +881,6 @@
                 critiqueOutput.innerHTML = `<p class="text-red-400">${friendlyErrorMessage}</p>`;
             }
         }
-
         async function handleQueryPdfGeneration() {
             const queryText = queryPdfInput.value;
             if (!queryText) {
@@ -970,7 +914,7 @@
             }
         }
 
-        // --- Lógica de Exportación ---
+        // --- Lógica de Exportación (sin cambios) ---
         
         function handleExportStory() {
             const storyContent = storyOutput.textContent.trim();
@@ -979,12 +923,9 @@
                 alert("No hay historia generada para exportar.");
                 return;
             }
-
             const format = prompt("¿Qué formato deseas exportar? Escribe 'PDF' o 'Word'.");
             if (!format) return; 
-
             const filename = `Capitulo_IA_${new Date().toISOString().slice(0, 10)}`;
-
             if (format.toLowerCase() === 'pdf') {
                 exportToPdfHTML(storyHTML, filename);
             } else if (format.toLowerCase() === 'word') {
@@ -993,7 +934,6 @@
                 alert("Formato no reconocido. Por favor escribe 'PDF' o 'Word'.");
             }
         }
-        
         function exportToPdfHTML(storyHTML, filename) {
             const tempDiv = document.createElement('div');
             tempDiv.innerHTML = `
@@ -1010,7 +950,6 @@
                 p.style.fontFamily = "'Times New Roman', serif";
                 p.style.textAlign = 'justify';
             });
-            
             const opt = {
                 margin: [1, 1, 1, 1],
                 filename: `${filename}.pdf`,
@@ -1018,7 +957,6 @@
                 html2canvas: { scale: 2, useCORS: true },
                 jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
             };
-
             try {
                 html2pdf().from(tempDiv).set(opt).save();
                 alert("Capítulo exportado a PDF.");
@@ -1027,13 +965,11 @@
                 alert("Error al exportar a PDF.");
             }
         }
-
         function exportToWord(content, filename) {
             const formattedContent = content.split('\n')
                 .filter(p => p.trim() !== '')
                 .map(p => `<p>${p.trim()}</p>`)
                 .join('\n');
-
             const htmlContent = `
                 <html lang="es" xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40">
                 <head>
@@ -1051,11 +987,9 @@
                 </body>
                 </html>
             `;
-
             const blob = new Blob(['\ufeff', htmlContent], {
                 type: 'application/msword;charset=utf-8'
             });
-
             const link = document.createElement('a');
             link.href = URL.createObjectURL(blob);
             link.download = `${filename}.doc`; 
@@ -1065,15 +999,13 @@
             alert("Capítulo exportado a Word (como archivo .doc).");
         }
 
-
-        // --- Lógica del Storybook ---
+        // --- Lógica del Storybook (sin cambios) ---
 
         const generateStorybookButton = document.getElementById('generateStorybookButton');
         const storybookModal = document.getElementById('storybookModal');
         const closeStorybookModal = document.getElementById('closeStorybookModal');
         const storybookContent = document.getElementById('storybookContent');
         const storybookStatus = document.getElementById('storybookStatus');
-
         generateStorybookButton.addEventListener('click', handleStorybookGeneration);
         closeStorybookModal.addEventListener('click', () => {
             storybookModal.classList.add('hidden');
@@ -1083,39 +1015,31 @@
         async function handleStorybookGeneration() {
             const fullStoryText = storyOutput.textContent;
             const artisticStyle = document.getElementById('artisticStyle').value;
-
             if (!fullStoryText || outputPlaceholder.style.display !== 'none') {
                 alert("Primero debes generar una historia (Paso 3) para crear un Storybook.");
                 return;
             }
-
             storybookModal.classList.remove('hidden');
             storybookContent.innerHTML = "";
             storybookStatus.textContent = "Preparando storybook...";
-
             const paragraphs = fullStoryText.split('\n').filter(p => p.trim().length > 10);
-            
             if (paragraphs.length === 0) {
                  storybookStatus.textContent = "Error: No se encontró texto válido para el storybook.";
                  return;
             }
-            
             const maxPages = Math.min(paragraphs.length, 5);
             storybookStatus.textContent = `Generando ${maxPages} páginas... (Esto puede tardar varios minutos)`;
-
             for (let i = 0; i < maxPages; i++) {
                 const text = paragraphs[i];
                 const pageNum = i + 1;
-                
                 storybookStatus.textContent = `Generando página ${pageNum} de ${maxPages}... (Texto, Imagen, Audio)`;
-
                 const pageElement = document.createElement('div');
                 pageElement.className = "storybook-page w-full p-4 md:p-8 flex flex-col md:flex-row gap-4 items-center justify-center";
                 pageElement.innerHTML = `
                     <div class="w-full md:w-1/2 h-64 md:h-full bg-gray-100 dark:bg-gray-800 rounded-lg flex items-center justify-center" id="image-container-${pageNum}">
                         <div class="loader w-10 h-10 border-4 border-transparent rounded-full"></div>
                     </div>
-                    <div class="w-full md:w-1/2 flex flex-col gap-4">
+                    <div class="w-full md:w-1f/2 flex flex-col gap-4">
                         <div class="p-4 bg-gray-100 dark:bg-gray-800 rounded-lg" id="audio-container-${pageNum}">
                             <div class="loader w-6 h-6 border-2 border-transparent rounded-full"></div>
                         </div>
@@ -1123,19 +1047,15 @@
                     </div>
                 `;
                 storybookContent.appendChild(pageElement);
-
                 try {
                     const [imageUrl, audioUrl] = await Promise.all([
                         callImagenAPI(text, artisticStyle),
                         callTTSAPI(text)
                     ]);
-                    
                     const imgContainer = document.getElementById(`image-container-${pageNum}`);
                     imgContainer.innerHTML = `<img src="${imageUrl}" class="w-full h-full object-cover rounded-lg shadow-lg">`;
-                    
                     const audioContainer = document.getElementById(`audio-container-${pageNum}`);
                     audioContainer.innerHTML = `<audio controls src="${audioUrl}" class="w-full"></audio>`;
-
                 } catch (error) {
                     console.error(`Error al generar la página ${pageNum}:`, error);
                     const imgContainer = document.getElementById(`image-container-${pageNum}`);
@@ -1144,7 +1064,6 @@
                     if (error.message && error.message.includes("401")) {
                         friendlyErrorMessage = "Error de Autenticación (401) en API de Imagen o Audio.";
                     }
-                    
                     if (error.message && error.message.includes("Imagen")) {
                          imgContainer.innerHTML = `<div class="text-red-400 p-4">${friendlyErrorMessage}</div>`;
                          audioContainer.innerHTML = `<div class="text-gray-500 p-4">Audio cancelado</div>`;
@@ -1157,14 +1076,12 @@
                     }
                 }
             }
-            
             if (paragraphs.length > maxPages) {
                 storybookStatus.textContent = `¡Storybook completo! Se mostraron las primeras ${maxPages} páginas.`;
             } else {
                 storybookStatus.textContent = `¡Storybook completo! ${maxPages} páginas generadas.`;
             }
         }
-
         async function callImagenAPI(textPrompt, style) {
             const imagePrompt = `Una ilustración digital en estilo ${style} que representa esta escena: ${textPrompt}`;
             const payload = {
@@ -1176,7 +1093,6 @@
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload)
             });
-
             if (!response.ok) {
                 let errorText = `Error en la API de Imagen: ${response.status} ${response.statusText}`;
                 try {
@@ -1185,7 +1101,6 @@
                 } catch (e) {}
                 throw new Error(errorText);
             }
-
             const result = await response.json();
             if (result.predictions && result.predictions.length > 0 && result.predictions[0].bytesBase64Encoded) {
                 return `data:image/png;base64,${result.predictions[0].bytesBase64Encoded}`;
@@ -1194,7 +1109,6 @@
                 throw new Error("No se recibió imagen de la API.");
             }
         }
-
         async function callTTSAPI(textToSpeak) {
             const shortText = textToSpeak.substring(0, 500);
             const payload = {
@@ -1210,7 +1124,6 @@
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload)
             });
-
             if (!response.ok) {
                 let errorText = `Error en la API de TTS: ${response.status} ${response.statusText}`;
                 try {
@@ -1219,12 +1132,10 @@
                 } catch (e) {}
                 throw new Error(errorText);
             }
-
             const result = await response.json();
             const part = result?.candidates?.[0]?.content?.parts?.[0];
             const audioData = part?.inlineData?.data;
             const mimeType = part?.inlineData?.mimeType;
-
             if (audioData && mimeType && mimeType.startsWith("audio/")) {
                 const sampleRateMatch = mimeType.match(/rate=(\d+)/);
                 const sampleRate = sampleRateMatch ? parseInt(sampleRateMatch[1], 10) : 24000;
@@ -1237,7 +1148,6 @@
                 throw new Error("Respuesta de TTS inválida.");
             }
         }
-
         function base64ToArrayBuffer(base64) {
             const binaryString = window.atob(base64);
             const len = binaryString.length;
@@ -1247,7 +1157,6 @@
             }
             return bytes.buffer;
         }
-
         function pcmToWav(pcmData, sampleRate) {
             const numChannels = 1;
             const bitsPerSample = 16;
@@ -1256,7 +1165,6 @@
             const dataSize = pcmData.length * (bitsPerSample / 8);
             const wavHeaderSize = 44;
             const fileSize = dataSize + wavHeaderSize;
-
             const buffer = new ArrayBuffer(fileSize);
             const view = new DataView(buffer);
             view.setUint32(0, 0x52494646, false);
@@ -1272,15 +1180,13 @@
             view.setUint16(34, bitsPerSample, true);
             view.setUint32(36, 0x64617461, false);
             view.setUint32(40, dataSize, true);
-
             for (let i = 0; i < pcmData.length; i++) {
                 view.setInt16(wavHeaderSize + i * 2, pcmData[i], true);
             }
             return new Blob([buffer], { type: 'audio/wav' });
         }
 
-
-        // --- Funciones de UI (Carga y Visualización) ---
+        // --- Funciones de UI (sin cambios) ---
 
         function getLoaderHTML(message) {
             return `
@@ -1289,8 +1195,6 @@
                     <p class="font-semibold">${message}</p>
                 </div>`;
         }
-
-
         function setLoading(isLoading) {
             if (isLoading) {
                 generateButton.disabled = true;
@@ -1300,11 +1204,9 @@
                 const spinner = document.createElement('div');
                 spinner.className = "loader w-5 h-5 border-2 border-transparent rounded-full mr-3";
                 generateButton.prepend(spinner);
-                
                 storyOutput.innerHTML = getLoaderHTML("Generando tu historia...");
                 outputPlaceholder.style.display = 'none';
                 updateOutputWordCount();
-
             } else {
                 generateButton.disabled = false;
                 buttonText.textContent = "Generar Capítulo";
@@ -1314,28 +1216,23 @@
                 }
             }
         }
-
         function displayStory(text, isContinuation = false) {
             const formattedText = text
                 .split('\n')
                 .filter(p => p.trim() !== '')
                 .map(p => `<p>${p}</p>`)
                 .join('');
-            
             if (isContinuation) {
                 storyOutput.innerHTML += formattedText;
             } else {
                 storyOutput.innerHTML = formattedText;
             }
-
             outputPlaceholder.style.display = 'none';
             continueButton.classList.remove('hidden');
             exportButton.classList.remove('hidden'); 
             updateOutputWordCount();
-            
             storyOutput.parentElement.scrollTop = storyOutput.parentElement.scrollHeight;
         }
-
         function displayError(message, isContinuation = false) {
             const errorHTML = `
                 <div class="h-full flex flex-col items-center justify-center text-center text-red-400">
@@ -1345,7 +1242,6 @@
                     <p class="font-semibold">Error</p>
                     <p>${message}</p>
                 </div>`;
-            
             if (isContinuation) {
                 storyOutput.innerHTML += `<div class="text-red-400 p-4">${message}</div>`;
                 continueButton.classList.remove('hidden');
@@ -1356,7 +1252,6 @@
                 continueButton.classList.add('hidden');
                 exportButton.classList.add('hidden');
             }
-            
             updateOutputWordCount();
         }
 
