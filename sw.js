@@ -1,10 +1,14 @@
 // Nombre de la caché
 const CACHE_NAME = 'fic-writer-pro-v1';
 
-// Archivos para guardar en caché
+// ESTA LÍNEA ES LA NUEVA Y MÁS IMPORTANTE
+const REPO_PREFIX = '/Fic_Worker/';
+
+// Archivos para guardar en caché (ahora con el prefijo)
 const urlsToCache = [
-  '/',
-  'index.html' // Asegúrate que tu archivo HTML se llame así
+  REPO_PREFIX,
+  REPO_PREFIX + 'index.html',
+  REPO_PREFIX + 'manifest.json'
 ];
 
 // Instalar el Service Worker
