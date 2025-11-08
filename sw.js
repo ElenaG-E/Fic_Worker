@@ -1,7 +1,7 @@
 // Nombre de la caché
 const CACHE_NAME = 'fic-writer-pro-v1';
 
-// ESTA LÍNEA ES LA NUEVA Y MÁS IMPORTANTE
+// ESTA LÍNEA ES LA MÁS IMPORTANTE
 const REPO_PREFIX = '/Fic_Worker/';
 
 // Archivos para guardar en caché (ahora con el prefijo)
