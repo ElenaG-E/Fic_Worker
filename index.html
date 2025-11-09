@@ -428,7 +428,7 @@
         // ⚠️ ⚠️ ⚠️ 
         // ¡PEGA TU CLAVE DE API SECRETA Y VÁLIDA AQUÍ!
         // ⚠️ ⚠️ ⚠️
-        const apiKey = "AIzaSyBesX_kgcD01qGavXAcPrxjBc1Su0d4ZI4"; // <-- REEMPLAZA ESTO
+        const apiKey = "AIzaSyB17YH21i6C5HgjkVic7LLPkxmurRiIuaY"; // <-- REEMPLAZA ESTO
         
         const geminiApiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
         const imagenApiUrl = `https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-002:predict?key=${apiKey}`;
@@ -657,26 +657,328 @@
             }
         };
 
-        const handleTwistGeneration = async () => { /* ... Implementación similar a callGeminiAPI */ };
-        const handleProfileGeneration = async () => { /* ... Implementación similar a callGeminiAPI */ };
-        const handleDialogueGeneration = async () => { /* ... Implementación similar a callGeminiAPI */ };
-        const handleCritiqueGeneration = async () => { /* ... Implementación similar a callGeminiAPI */ };
-        const handleQueryPdfGeneration = async () => { /* ... Implementación similar a callGeminiAPI */ };
-        const handleExportStory = () => { /* ... Código de exportación */ };
-        const handleStorybookGeneration = async () => { /* ... Código de Storybook */ };
-        // (El resto de las funciones auxiliares de Storybook, TTS y UI se mantienen igual para concisión)
+        const handleTwistGeneration = async () => {
+            const userPrompt = promptEditor.value;
+            if (!userPrompt) {
+                alert("Por favor, escribe un prompt en el Paso 2 para generar giros de trama.");
+                return;
+            }
+            const twistModal = document.getElementById('twistModal');
+            const twistOutput = document.getElementById('twistOutput');
+            twistModal.classList.remove('hidden');
+            twistOutput.textContent = "Generando giros de trama...";
+            let contextRules = "";
+            if (globalPdfContext) {
+                contextRules = `Usa el siguiente CONTEXTO del PDF para inspirarte: ${globalPdfContext.substring(0, 20000)}`;
+            }
+            const systemPrompt = `Eres un experto en escritura creativa. Genera 3-5 ideas originales de giros de trama para continuar o mejorar la historia basada en el prompt del usuario. Cada giro debe ser breve (1-2 oraciones) pero impactante. ${contextRules}`;
+            try {
+                const twists = await callGeminiAPI(systemPrompt, `Prompt del usuario: ${userPrompt}`);
+                twistOutput.innerHTML = twists.replace(/\n/g, '<br>');
+            } catch (error) {
+                twistOutput.textContent = "Error al generar giros: " + error.message;
+            }
+        };
+
+        const handleProfileGeneration = async () => {
+            const characterName = document.getElementById('characterNameInput').value.trim();
+            if (!characterName) {
+                alert("Por favor, ingresa el nombre del personaje.");
+                return;
+            }
+            const profileOutput = document.getElementById('profileOutput');
+            profileOutput.textContent = "Generando perfil...";
+            let contextRules = "";
+            if (globalPdfContext) {
+                contextRules = `Incorpora detalles del CONTEXTO del PDF si es relevante: ${globalPdfContext.substring(0, 20000)}`;
+            }
+            const systemPrompt = `Eres un experto en desarrollo de personajes. Crea un perfil detallado para el personaje "${characterName}" basado en el contexto de la historia. Incluye apariencia, personalidad, backstory, motivaciones y relaciones. ${contextRules}`;
+            try {
+                const profile = await callGeminiAPI(systemPrompt, `Genera un perfil completo para ${characterName}.`);
+                profileOutput.innerHTML = profile.replace(/\n/g, '<br>');
+            } catch (error) {
+                profileOutput.textContent = "Error al generar perfil: " + error.message;
+            }
+        };
+
+        const handleDialogueGeneration = async () => {
+            const charA = document.getElementById('charAInput').value.trim();
+            const charB = document.getElementById('charBInput').value.trim();
+            const sceneContext = document.getElementById('sceneContextInput').value.trim();
+            if (!charA || !charB || !sceneContext) {
+                alert("Por favor, completa todos los campos.");
+                return;
+            }
+            const dialogueOutput = document.getElementById('dialogueOutput');
+            dialogueOutput.textContent = "Generando diálogo...";
+            const systemPrompt = `Eres un experto en escritura de diálogos. Genera un diálogo natural y engaging entre ${charA} y ${charB} basado en el contexto de la escena. Mantén el tono consistente con la historia.`;
+            try {
+                const dialogue = await callGeminiAPI(systemPrompt, `Contexto: ${sceneContext}`);
+                dialogueOutput.innerHTML = dialogue.replace(/\n/g, '<br>');
+            } catch (error) {
+                dialogueOutput.textContent = "Error al generar diálogo: " + error.message;
+            }
+        };
+
+        const handleCritiqueGeneration = async () => {
+            const currentStory = storyOutput.textContent;
+            if (!currentStory) {
+                alert("Primero genera una historia para criticar.");
+                return;
+            }
+            const critiqueOutput = document.getElementById('critiqueOutput');
+            critiqueOutput.textContent = "Generando crítica...";
+            const systemPrompt = `Eres un crítico literario experto. Proporciona una crítica constructiva del capítulo generado, incluyendo fortalezas, debilidades y sugerencias de mejora. Sé específico y útil.`;
+            try {
+                const critique = await callGeminiAPI(systemPrompt, `Capítulo a criticar: ${currentStory.substring(0, 10000)}`);
+                critiqueOutput.innerHTML = critique.replace(/\n/g, '<br>');
+            } catch (error) {
+                critiqueOutput.textContent = "Error al generar crítica: " + error.message;
+            }
+        };
+
+        const handleQueryPdfGeneration = async () => {
+            const query = document.getElementById('queryPdfInput').value.trim();
+            if (!query) {
+                alert("Por favor, ingresa una pregunta.");
+                return;
+            }
+            if (!globalPdfContext) {
+                alert("Primero carga un PDF para consultar.");
+                return;
+            }
+            const queryPdfOutput = document.getElementById('queryPdfOutput');
+            queryPdfOutput.textContent = "Consultando PDF...";
+            const systemPrompt = `Eres un asistente que responde preguntas basadas en el contenido de un PDF. Responde de manera precisa y concisa usando solo la información del CONTEXTO proporcionado.`;
+            try {
+                const answer = await callGeminiAPI(systemPrompt, `Pregunta: ${query}\n\nCONTEXTO: ${globalPdfContext.substring(0, 40000)}`);
+                queryPdfOutput.innerHTML = answer.replace(/\n/g, '<br>');
+            } catch (error) {
+                queryPdfOutput.textContent = "Error al consultar PDF: " + error.message;
+            }
+        };
+
+        const handleExportStory = () => {
+            const storyText = storyOutput.textContent;
+            if (!storyText) {
+                alert("Primero genera una historia para exportar.");
+                return;
+            }
+            const element = document.createElement('div');
+            element.innerHTML = `<h1>Fic Writer Pro - Capítulo Exportado</h1><p>${storyText.replace(/\n/g, '</p><p>')}</p>`;
+            const opt = {
+                margin: 1,
+                filename: 'capitulo.pdf',
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 2 },
+                jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
+            };
+            html2pdf().set(opt).from(element).save();
+        };
+
+        const handleStorybookGeneration = async () => {
+            const storyText = storyOutput.textContent;
+            if (!storyText) {
+                alert("Primero genera una historia para crear el storybook.");
+                return;
+            }
+            const storybookModal = document.getElementById('storybookModal');
+            const storybookContent = document.getElementById('storybookContent');
+            const storybookStatus = document.getElementById('storybookStatus');
+            storybookModal.classList.remove('hidden');
+            storybookContent.innerHTML = '';
+            storybookStatus.textContent = 'Generando storybook...';
+
+            const artisticStyle = document.getElementById('artisticStyle').value;
+            const paragraphs = storyText.split('\n\n').filter(p => p.trim());
+            let pageCount = 0;
+
+            for (const paragraph of paragraphs.slice(0, 10)) { // Limit to 10 pages for demo
+                pageCount++;
+                storybookStatus.textContent = `Generando página ${pageCount}...`;
+
+                // Generate image prompt
+                const imagePrompt = `Ilustración en estilo ${artisticStyle} para esta escena de la historia: ${paragraph.substring(0, 200)}`;
+
+                try {
+                    const imageUrl = await generateImage(imagePrompt);
+                    const audioBase64 = await generateTTS(paragraph);
+
+                    const pageDiv = document.createElement('div');
+                    pageDiv.className = 'storybook-page p-6 flex flex-col items-center justify-center text-center';
+                    pageDiv.innerHTML = `
+                        <img src="${imageUrl}" alt="Ilustración" class="max-w-full max-h-64 mb-4 rounded-lg">
+                        <p class="text-lg mb-4">${paragraph}</p>
+                        <audio controls class="w-full">
+                            <source src="data:audio/wav;base64,${audioBase64}" type="audio/wav">
+                        </audio>
+                    `;
+                    storybookContent.appendChild(pageDiv);
+                } catch (error) {
+                    console.error('Error generating page:', error);
+                    const pageDiv = document.createElement('div');
+                    pageDiv.className = 'storybook-page p-6 flex flex-col items-center justify-center text-center';
+                    pageDiv.innerHTML = `<p>Error al generar página ${pageCount}</p>`;
+                    storybookContent.appendChild(pageDiv);
+                }
+            }
+
+            storybookStatus.textContent = 'Storybook generado con éxito!';
+        };
+
+        const generateImage = async (prompt) => {
+            const payload = { prompt: prompt };
+            const response = await fetch(imagenApiUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            if (!response.ok) throw new Error('Error generando imagen');
+            const result = await response.json();
+            return result.predictions[0].image; // Assuming the API returns base64 or URL
+        };
+
+        const generateTTS = async (text) => {
+            const payload = {
+                contents: [{ parts: [{ text: text }] }],
+                generationConfig: { responseModalities: ['text', 'audio'] }
+            };
+            const response = await fetch(ttsApiUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            if (!response.ok) throw new Error('Error generando audio');
+            const result = await response.json();
+            return result.candidates[0].content.parts[0].audio; // Assuming base64 audio
+        };
+
+        function getLoaderHTML(message) {
+            return `
+                <div class="flex flex-col items-center justify-center h-full">
+                    <div class="loader border-4 border-gray-300 rounded-full w-12 h-12 mb-4"></div>
+                    <p class="text-gray-500 dark:text-gray-400">${message}</p>
+                </div>
+            `;
+        }
+
+        function setLoading(isLoading) {
+            if (isLoading) {
+                storyOutput.innerHTML = getLoaderHTML('Generando historia...');
+                outputPlaceholder.style.display = 'none';
+                generateButton.disabled = true;
+                buttonText.textContent = 'Generando...';
+            } else {
+                generateButton.disabled = false;
+                buttonText.textContent = 'Generar Capítulo';
+            }
+        }
+
+        function displayStory(text, isContinuation = false) {
+            if (isContinuation) {
+                storyOutput.innerHTML += '<br><br>' + text.replace(/\n/g, '<br>');
+            } else {
+                storyOutput.innerHTML = text.replace(/\n/g, '<br>');
+                outputPlaceholder.style.display = 'none';
+                continueButton.classList.remove('hidden');
+                exportButton.classList.remove('hidden');
+            }
+            updateOutputWordCount();
+        }
+
+        function displayError(message, isContinuation = false) {
+            if (isContinuation) {
+                storyOutput.innerHTML += '<br><br><span class="text-red-500">' + message + '</span>';
+            } else {
+                storyOutput.innerHTML = '<span class="text-red-500">' + message + '</span>';
+                outputPlaceholder.style.display = 'none';
+            }
+        }
+
+        function base64ToArrayBuffer(base64) {
+            const binaryString = atob(base64);
+            const len = binaryString.length;
+            const bytes = new Uint8Array(len);
+            for (let i = 0; i < len; i++) {
+                bytes[i] = binaryString.charCodeAt(i);
+            }
+            return bytes.buffer;
+        }
+
+        function pcmToWav(pcmData, sampleRate = 22050) {
+            const numChannels = 1;
+            const bytesPerSample = 2;
+            const blockAlign = numChannels * bytesPerSample;
+            const byteRate = sampleRate * blockAlign;
+            const dataSize = pcmData.length * bytesPerSample;
+            const bufferSize = 44 + dataSize;
+
+            const buffer = new ArrayBuffer(bufferSize);
+            const view = new DataView(buffer);
+
+            // WAV header
+            const writeString = (offset, string) => {
+                for (let i = 0; i < string.length; i++) {
+                    view.setUint8(offset + i, string.charCodeAt(i));
+                }
+            };
+
+            writeString(0, 'RIFF');
+            view.setUint32(4, bufferSize - 8, true);
+            writeString(8, 'WAVE');
+            writeString(12, 'fmt ');
+            view.setUint32(16, 16, true);
+            view.setUint16(20, 1, true); // PCM
+            view.setUint16(22, numChannels, true);
+            view.setUint32(24, sampleRate, true);
+            view.setUint32(28, byteRate, true);
+            view.setUint16(32, blockAlign, true);
+            view.setUint16(34, bytesPerSample * 8, true);
+            writeString(36, 'data');
+            view.setUint32(40, dataSize, true);
+
+            // PCM data
+            for (let i = 0; i < pcmData.length; i++) {
+                view.setInt16(44 + i * 2, pcmData[i] * 32767, true);
+            }
+
+            return buffer;
+        }
         
         // --- Event Listeners ---
         generateButton.addEventListener('click', handleStoryGeneration);
         continueButton.addEventListener('click', handleStoryContinuation);
         exportButton.addEventListener('click', handleExportStory);
-        // Event listeners para modales y herramientas (se omiten por concisión, pero deben estar en el código final)
 
-        function getLoaderHTML(message) { /* ... */ return `...`; }
-        function setLoading(isLoading) { /* ... */ }
-        function displayStory(text, isContinuation = false) { /* ... */ }
-        function displayError(message, isContinuation = false) { /* ... */ }
-        // Las funciones restantes (base64ToArrayBuffer, pcmToWav, etc.) también deben estar completas.
+        // Tool buttons
+        document.getElementById('generateTwistButton').addEventListener('click', handleTwistGeneration);
+        document.getElementById('generateProfileButton').addEventListener('click', handleProfileGeneration);
+        document.getElementById('generateDialogueButton').addEventListener('click', handleDialogueGeneration);
+        document.getElementById('critiqueButton').addEventListener('click', handleCritiqueGeneration);
+        document.getElementById('queryPdfButton').addEventListener('click', handleQueryPdfGeneration);
+        document.getElementById('generateStorybookButton').addEventListener('click', handleStorybookGeneration);
+
+        // Modal close buttons
+        document.getElementById('closeTwistModal').addEventListener('click', () => {
+            document.getElementById('twistModal').classList.add('hidden');
+        });
+        document.getElementById('closeProfileModal').addEventListener('click', () => {
+            document.getElementById('profileModal').classList.add('hidden');
+        });
+        document.getElementById('closeDialogueModal').addEventListener('click', () => {
+            document.getElementById('dialogueModal').classList.add('hidden');
+        });
+        document.getElementById('closeCritiqueModal').addEventListener('click', () => {
+            document.getElementById('critiqueModal').classList.add('hidden');
+        });
+        document.getElementById('closeQueryPdfModal').addEventListener('click', () => {
+            document.getElementById('queryPdfModal').classList.add('hidden');
+        });
+        document.getElementById('closeStorybookModal').addEventListener('click', () => {
+            document.getElementById('storybookModal').classList.add('hidden');
+        });
+
+        // All functions are now implemented above.
 
     </script>
 </body>
