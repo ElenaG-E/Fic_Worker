@@ -1,11 +1,10 @@
 // Nombre de la caché
-const CACHE_NAME = 'fic-writer-pro-v1';
+const CACHE_NAME = 'fic-writer-pro-v2'; // Cambiado a v2 para forzar la actualización de caché
 
-// ESTA LÍNEA ES LA MÁS IMPORTANTE
-// Está configurada para un repositorio llamado "fic-writer-app"
-const REPO_PREFIX = '/fic-writer-app/';
+// **¡AJUSTA ESTA LÍNEA SI TU REPOSITORIO NO SE LLAMA 'fic-writer-app'!**
+const REPO_PREFIX = '/fic-writer-app/'; 
 
-// Archivos para guardar en caché (ahora con el prefijo)
+// Archivos principales a guardar en caché
 const urlsToCache = [
   REPO_PREFIX,
   REPO_PREFIX + 'index.html',
@@ -17,30 +16,40 @@ self.addEventListener('install', event => {
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then(cache => {
-        console.log('Cache abierto');
+        console.log('Cache abierto:', CACHE_NAME);
         return cache.addAll(urlsToCache);
       })
+      .catch(error => console.error('Fallo al precachear archivos:', error))
+  );
+});
+
+// Limpiar cachés antiguas (Esto forzará la actualización)
+self.addEventListener('activate', event => {
+  const cacheWhitelist = [CACHE_NAME];
+  event.waitUntil(
+    caches.keys().then(cacheNames => {
+      return Promise.all(
+        cacheNames.map(cacheName => {
+          if (cacheWhitelist.indexOf(cacheName) === -1) {
+            console.log('Eliminando caché antigua:', cacheName);
+            return caches.delete(cacheName);
+          }
+        })
+      );
+    })
   );
 });
 
 // Interceptar peticiones de red
 self.addEventListener('fetch', event => {
-  event.respondWith(
-    caches.match(event.request)
-      .then(response => {
-        // Si está en caché, lo devuelve. Si no, va a la red.
-        return response || fetch(event.request);
-      })
-  );
-});
-
-// Limpiar cachés antiguas
-self.addEventListener('activate', event => {
-  event.waitUntil(
-    caches.keys().then(cacheNames => {
-      return Promise.all(
-        cacheNames.filter(name => name !== CACHE_NAME).map(name => caches.delete(name))
-      );
-    })
-  );
+  // Solo interceptamos peticiones dentro de nuestro scope
+  if (event.request.url.startsWith(self.location.origin)) {
+    event.respondWith(
+      caches.match(event.request)
+        .then(response => {
+          // Devolver desde caché, o ir a la red si no se encuentra
+          return response || fetch(event.request);
+        })
+    );
+  }
 });
