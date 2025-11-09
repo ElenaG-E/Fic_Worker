@@ -2,7 +2,8 @@
 const CACHE_NAME = 'fic-writer-pro-v1';
 
 // ESTA LÍNEA ES LA MÁS IMPORTANTE
-const REPO_PREFIX = '/Fic_Worker/';
+// Está configurada para un repositorio llamado "fic-writer-app"
+const REPO_PREFIX = '/fic-writer-app/';
 
 // Archivos para guardar en caché (ahora con el prefijo)
 const urlsToCache = [
@@ -30,5 +31,16 @@ self.addEventListener('fetch', event => {
         // Si está en caché, lo devuelve. Si no, va a la red.
         return response || fetch(event.request);
       })
+  );
+});
+
+// Limpiar cachés antiguas
+self.addEventListener('activate', event => {
+  event.waitUntil(
+    caches.keys().then(cacheNames => {
+      return Promise.all(
+        cacheNames.filter(name => name !== CACHE_NAME).map(name => caches.delete(name))
+      );
+    })
   );
 });
