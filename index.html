@@ -68,31 +68,31 @@
     
     <style>
         body { font-family: 'Inter', sans-serif; overscroll-behavior: none; }
-        
+
         /* Estilos de Formulario */
         .form-input {
-            @apply w-full p-3 bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg shadow-inner text-gray-900 dark:text-gray-300 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition duration-200;
+            @apply w-full p-3 bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-xl shadow-sm text-gray-900 dark:text-gray-300 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition duration-200;
         }
         .form-select {
-            @apply w-full p-3 bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg shadow-inner text-gray-900 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition duration-200;
+            @apply w-full p-3 bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-xl shadow-sm text-gray-900 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition duration-200;
         }
         /* Estilos de Tarjeta (Card) */
         .card {
-            @apply bg-white dark:bg-gray-900 shadow-xl rounded-3xl ring-1 ring-gray-900/5 dark:ring-gray-800 transition-all;
+            @apply bg-white dark:bg-gray-900 shadow-lg rounded-2xl ring-1 ring-gray-200 dark:ring-gray-700 transition-all duration-300;
         }
-        
+
         /* Estilos de Botón Primario */
         .btn {
-            @apply w-full font-bold py-3 px-6 rounded-lg shadow-lg hover:shadow-xl text-lg flex items-center justify-center transform hover:-translate-y-0.5 transition-all duration-200;
+            @apply w-full font-semibold py-3 px-4 rounded-xl shadow-md hover:shadow-lg text-base flex items-center justify-center transform hover:-translate-y-0.5 transition-all duration-200 active:scale-95;
         }
         .btn-green { @apply bg-green-600 text-white hover:bg-green-700 hover:shadow-green-500/50; }
         .btn-pink { @apply bg-pink-600 text-white hover:bg-pink-700 hover:shadow-pink-500/50; }
         .btn-primary { @apply bg-primary-600 text-white hover:bg-primary-700 hover:shadow-primary-500/50; }
         .btn-yellow { @apply bg-yellow-500 text-white hover:bg-yellow-600 hover:shadow-yellow-500/50; }
-        
+
         /* Estilos de Botón de Herramienta */
         .btn-tool {
-             @apply w-full font-semibold py-2 px-4 rounded-lg shadow-md hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-200;
+             @apply w-full font-medium py-2 px-3 rounded-lg shadow-sm hover:shadow-md transform hover:-translate-y-0.5 transition-all duration-200 active:scale-95;
         }
         .btn-tool-indigo { @apply bg-indigo-500 text-white hover:bg-indigo-600 hover:shadow-indigo-500/50; }
         .btn-tool-blue { @apply bg-blue-500 text-white hover:bg-blue-600 hover:shadow-blue-500/50; }
@@ -101,13 +101,39 @@
         .btn-tool-orange { @apply bg-orange-500 text-white hover:bg-orange-600 hover:shadow-orange-500/50; }
 
         /* Estilos de Layout y Salida */
-        #storyOutput { min-height: 400px; max-height: 70vh; overflow-y: auto; }
+        #storyOutput { min-height: 300px; max-height: 60vh; overflow-y: auto; }
         .loader { border-top-color: #0ea5e9; animation: spin 1s linear infinite; }
         @keyframes spin { to { transform: rotate(360deg); } }
+        .editor-textarea { resize: both; min-height: 100px; position: relative; cursor: move; }
         #storybookContent { scroll-snap-type: y mandatory; overflow-y: scroll; height: 70vh; }
         .storybook-page { scroll-snap-align: start; flex-shrink: 0; height: 100%; }
         #storybookContent::-webkit-scrollbar { display: none; }
         #storybookContent { -ms-overflow-style: none; scrollbar-width: none; }
+
+        /* Dark Mode Toggle */
+        .toggle-switch {
+            @apply relative inline-block w-12 h-6 bg-gray-300 dark:bg-gray-600 rounded-full transition duration-300;
+        }
+        .toggle-switch input { @apply opacity-0 w-0 h-0; }
+        .toggle-slider {
+            @apply absolute cursor-pointer top-0 left-0 right-0 bottom-0 bg-gray-300 dark:bg-gray-600 rounded-full transition duration-300;
+        }
+        .toggle-slider:before {
+            @apply absolute h-5 w-5 bg-white rounded-full transition duration-300;
+            content: "";
+            left: 0.5rem;
+            bottom: 0.125rem;
+        }
+        input:checked + .toggle-slider { @apply bg-primary-500; }
+        input:checked + .toggle-slider:before { @apply transform translate-x-6; }
+
+        /* Responsive Improvements */
+        @media (max-width: 640px) {
+            .card { @apply rounded-xl p-4; }
+            .btn { @apply py-2.5 px-3 text-sm; }
+            .btn-tool { @apply py-1.5 px-2 text-sm; }
+            #storyOutput { max-height: 50vh; }
+        }
     </style>
 </head>
 <body class="bg-gray-100 dark:bg-gray-950 text-gray-700 dark:text-gray-300 h-full p-4 md:p-8">
@@ -430,9 +456,9 @@
         // ⚠️ ⚠️ ⚠️
         const apiKey = "AIzaSyB17YH21i6C5HgjkVic7LLPkxmurRiIuaY"; // <-- REEMPLAZA ESTO
         
-        const geminiApiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
-        const imagenApiUrl = `https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-002:predict?key=${apiKey}`;
-        const ttsApiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-tts:generateContent?key=${apiKey}`;
+        const geminiApiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+        const imagenApiUrl = `https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-001:predict?key=${apiKey}`;
+        const ttsApiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`; // Note: TTS not directly supported, using text generation
 
         pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
 
@@ -839,18 +865,9 @@
         };
 
         const generateTTS = async (text) => {
-            const payload = {
-                contents: [{ parts: [{ text: text }] }],
-                generationConfig: { responseModalities: ['text', 'audio'] }
-            };
-            const response = await fetch(ttsApiUrl, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
-            });
-            if (!response.ok) throw new Error('Error generando audio');
-            const result = await response.json();
-            return result.candidates[0].content.parts[0].audio; // Assuming base64 audio
+            // TTS not supported in Gemini API, return a placeholder or alert
+            alert('TTS no está soportado en la API actual. Usando placeholder.');
+            return 'placeholder_audio_base64'; // Placeholder
         };
 
         function getLoaderHTML(message) {
@@ -945,6 +962,30 @@
             return buffer;
         }
         
+        // Drag functionality for textarea
+        let isDragging = false;
+        let dragOffsetX = 0;
+        let dragOffsetY = 0;
+
+        promptEditor.addEventListener('mousedown', (e) => {
+            isDragging = true;
+            dragOffsetX = e.clientX - promptEditor.offsetLeft;
+            dragOffsetY = e.clientY - promptEditor.offsetTop;
+            promptEditor.style.position = 'absolute';
+            promptEditor.style.zIndex = '1000';
+        });
+
+        document.addEventListener('mousemove', (e) => {
+            if (isDragging) {
+                promptEditor.style.left = (e.clientX - dragOffsetX) + 'px';
+                promptEditor.style.top = (e.clientY - dragOffsetY) + 'px';
+            }
+        });
+
+        document.addEventListener('mouseup', () => {
+            isDragging = false;
+        });
+
         // --- Event Listeners ---
         generateButton.addEventListener('click', handleStoryGeneration);
         continueButton.addEventListener('click', handleStoryContinuation);

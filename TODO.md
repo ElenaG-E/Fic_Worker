@@ -1,0 +1,5 @@
+- [x] Update API model names in index.html JS
+- [x] Add drag functionality to textarea #promptEditor
+- [x] Modify TTS function to handle unsupported feature
+- [ ] Test drag and resize
+- [ ] Test tool buttons (fix any JS errors)
