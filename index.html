@@ -104,7 +104,7 @@
         #storyOutput { min-height: 300px; max-height: 60vh; overflow-y: auto; }
         .loader { border-top-color: #0ea5e9; animation: spin 1s linear infinite; }
         @keyframes spin { to { transform: rotate(360deg); } }
-        .editor-textarea { resize: both; min-height: 100px; position: relative; cursor: move; }
+        .editor-textarea { resize: both; min-height: 100px; }
         #storybookContent { scroll-snap-type: y mandatory; overflow-y: scroll; height: 70vh; }
         .storybook-page { scroll-snap-align: start; flex-shrink: 0; height: 100%; }
         #storybookContent::-webkit-scrollbar { display: none; }
@@ -238,7 +238,7 @@
                     <label for="promptEditor" class="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">
                         ¡Tu idea va aquí!
                     </label>
-                    <textarea id="promptEditor" class="form-input editor-textarea" rows="4" placeholder="Ej: Comienza con una idea... 'Un capítulo donde Elara se encuentra con el Inquisidor bajo la lluvia... él se da cuenta de que ella mintió sobre el artefacto.'"></textarea>
+                    <textarea id="promptEditor" class="form-input editor-textarea" rows="4" placeholder="Ej: Comienza con una idea... 'Un capítulo donde Elara se encuentra con el Inquisidor bajo la lluvia... él se da cuenta de que ella mintió sobre el artefacto.'" style="width: 100%; height: auto; resize: both;"></textarea>
                     <div id="editorWordCount" class="text-sm text-right text-gray-500 mt-2">
                         Palabras: 0
                     </div>
@@ -332,35 +332,38 @@
 
     <div id="twistModal" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center p-4 hidden z-50">
         <div class="card max-w-2xl w-full p-6 max-h-[80vh] flex flex-col">
-            <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-4">💡 Giros de Trama Sugeridos</h2>
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-2xl font-bold text-gray-900 dark:text-white">💡 Giros de Trama Sugeridos</h2>
+                <button id="closeTwistModal" class="text-gray-400 hover:text-gray-900 dark:hover:text-white text-3xl transition duration-200">&times;</button>
+            </div>
             <div id="twistOutput" class="flex-grow overflow-y-auto bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-lg p-4 text-gray-700 dark:text-gray-300 min-h-[200px]">
             </div>
-            <button id="closeTwistModal" class="mt-4 btn-tool btn-tool-indigo self-end">
-                Cerrar
-            </button>
         </div>
     </div>
 
     <div id="profileModal" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center p-4 hidden z-50">
         <div class="card max-w-2xl w-full p-6 max-h-[80vh] flex flex-col">
-            <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-4">👤 Generador de Perfil de Personaje</h2>
-            <label for="characterNameInput" class="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">Nombre del Personaje</LAbel>
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-2xl font-bold text-gray-900 dark:text-white">👤 Generador de Perfil de Personaje</h2>
+                <button id="closeProfileModal" class="text-gray-400 hover:text-gray-900 dark:hover:text-white text-3xl transition duration-200">&times;</button>
+            </div>
+            <label for="characterNameInput" class="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">Nombre del Personaje</label>
             <input type="text" id="characterNameInput" placeholder="Ej: 'Elara' o 'El Inquisidor'" class="form-input mb-4">
             <button id="runProfileGeneration" class="btn-tool btn-tool-blue mb-4">
                 Generar Perfil
             </button>
             <div id="profileOutput" class="flex-grow overflow-y-auto bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-lg p-4 text-gray-700 dark:text-gray-300 min-h-[200px]">
             </div>
-            <button id="closeProfileModal" class="mt-4 btn-tool bg-gray-600 text-white hover:bg-gray-700 self-end">
-                Cerrar
-            </button>
         </div>
     </div>
 
     <div id="dialogueModal" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center p-4 hidden z-50">
         <div class="card max-w-2xl w-full p-6 max-h-[80vh] flex flex-col">
-            <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-4">💬 Ayudante de Diálogo</h2>
-            <label for="charAInput" class="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">Personaje A</LAbel>
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-2xl font-bold text-gray-900 dark:text-white">💬 Ayudante de Diálogo</h2>
+                <button id="closeDialogueModal" class="text-gray-400 hover:text-gray-900 dark:hover:text-white text-3xl transition duration-200">&times;</button>
+            </div>
+            <label for="charAInput" class="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">Personaje A</label>
             <input type="text" id="charAInput" placeholder="Ej: 'Elara'" class="form-input mb-2">
             <label for="charBInput" class="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">Personaje B</label>
             <input type="text" id="charBInput" placeholder="Ej: 'Inquisidor'" class="form-input mb-4">
@@ -371,26 +374,26 @@
             </button>
             <div id="dialogueOutput" class="flex-grow overflow-y-auto bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-lg p-4 text-gray-700 dark:text-gray-300 min-h-[200px]">
             </div>
-            <button id="closeDialogueModal" class="mt-4 btn-tool bg-gray-600 text-white hover:bg-gray-700 self-end">
-                Cerrar
-            </button>
         </div>
     </div>
 
     <div id="critiqueModal" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center p-4 hidden z-50">
         <div class="card max-w-2xl w-full p-6 max-h-[80vh] flex flex-col">
-            <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-4">🧐 Crítica del Capítulo</h2>
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-2xl font-bold text-gray-900 dark:text-white">🧐 Crítica del Capítulo</h2>
+                <button id="closeCritiqueModal" class="text-gray-400 hover:text-gray-900 dark:hover:text-white text-3xl transition duration-200">&times;</button>
+            </div>
             <div id="critiqueOutput" class="flex-grow overflow-y-auto bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-lg p-4 text-gray-700 dark:text-gray-300 min-h-[200px]">
             </div>
-            <button id="closeCritiqueModal" class="mt-4 btn-tool btn-tool-purple self-end">
-                Cerrar
-            </button>
         </div>
     </div>
 
     <div id="queryPdfModal" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center p-4 hidden z-50">
         <div class="card max-w-2xl w-full p-6 max-h-[80vh] flex flex-col">
-            <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-4">🔍 Consultar PDF</h2>
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-2xl font-bold text-gray-900 dark:text-white">🔍 Consultar PDF</h2>
+                <button id="closeQueryPdfModal" class="text-gray-400 hover:text-gray-900 dark:hover:text-white text-3xl transition duration-200">&times;</button>
+            </div>
             <label for="queryPdfInput" class="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">Tu Pregunta sobre el PDF</label>
             <input type="text" id="queryPdfInput" placeholder="Ej: ¿Cuál es el nombre del capitán?" class="form-input mb-4">
             <button id="runQueryPdfGeneration" class="btn-tool btn-tool-orange mb-4">
@@ -398,9 +401,6 @@
             </button>
             <div id="queryPdfOutput" class="flex-grow overflow-y-auto bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-lg p-4 text-gray-700 dark:text-gray-300 min-h-[150px]">
             </div>
-            <button id="closeQueryPdfModal" class="mt-4 btn-tool bg-gray-600 text-white hover:bg-gray-700 self-end">
-                Cerrar
-            </button>
         </div>
     </div>
 
@@ -451,12 +451,13 @@
         const continueButton = document.getElementById('continueButton');
         const exportButton = document.getElementById('exportButton'); 
 
-        // ⚠️ ⚠️ ⚠️ 
+        // ⚠️ ⚠️ ⚠️
         // ¡PEGA TU CLAVE DE API SECRETA Y VÁLIDA AQUÍ!
         // ⚠️ ⚠️ ⚠️
-        const apiKey = "AIzaSyB17YH21i6C5HgjkVic7LLPkxmurRiIuaY"; // <-- REEMPLAZA ESTO
+        let apiKey = localStorage.getItem('geminiApiKey') || "AIzaSyB17YH21i6C5HgjkVic7LLPkxmurRiIuaY"; // Default, but save to localStorage
+        localStorage.setItem('geminiApiKey', apiKey);
         
-        const geminiApiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+        const geminiApiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
         const imagenApiUrl = `https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-001:predict?key=${apiKey}`;
         const ttsApiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`; // Note: TTS not directly supported, using text generation
 
@@ -648,7 +649,7 @@
             if (!apiKey || apiKey === "AIzaSyBesX_kgcD01qGavXAcPrxjBc1Su0d4ZI4") {
                  throw new Error("Clave de API no configurada. Por favor, edita el archivo index.html y pega tu API Key.");
             }
-            const payload = { systemInstruction: { parts: [{ text: systemPrompt }] }, contents: [{ parts: [{ text: userPromptText }] }] };
+            const payload = { contents: [{ parts: [{ text: systemPrompt + "\n\n" + userPromptText }] }] };
             let response;
             let retries = 3;
             let delay = 1000;
@@ -707,6 +708,8 @@
         };
 
         const handleProfileGeneration = async () => {
+            const profileModal = document.getElementById('profileModal');
+            profileModal.classList.remove('hidden');
             const characterName = document.getElementById('characterNameInput').value.trim();
             if (!characterName) {
                 alert("Por favor, ingresa el nombre del personaje.");
@@ -728,6 +731,8 @@
         };
 
         const handleDialogueGeneration = async () => {
+            const dialogueModal = document.getElementById('dialogueModal');
+            dialogueModal.classList.remove('hidden');
             const charA = document.getElementById('charAInput').value.trim();
             const charB = document.getElementById('charBInput').value.trim();
             const sceneContext = document.getElementById('sceneContextInput').value.trim();
@@ -764,6 +769,8 @@
         };
 
         const handleQueryPdfGeneration = async () => {
+            const queryPdfModal = document.getElementById('queryPdfModal');
+            queryPdfModal.classList.remove('hidden');
             const query = document.getElementById('queryPdfInput').value.trim();
             if (!query) {
                 alert("Por favor, ingresa una pregunta.");
@@ -962,29 +969,7 @@
             return buffer;
         }
         
-        // Drag functionality for textarea
-        let isDragging = false;
-        let dragOffsetX = 0;
-        let dragOffsetY = 0;
 
-        promptEditor.addEventListener('mousedown', (e) => {
-            isDragging = true;
-            dragOffsetX = e.clientX - promptEditor.offsetLeft;
-            dragOffsetY = e.clientY - promptEditor.offsetTop;
-            promptEditor.style.position = 'absolute';
-            promptEditor.style.zIndex = '1000';
-        });
-
-        document.addEventListener('mousemove', (e) => {
-            if (isDragging) {
-                promptEditor.style.left = (e.clientX - dragOffsetX) + 'px';
-                promptEditor.style.top = (e.clientY - dragOffsetY) + 'px';
-            }
-        });
-
-        document.addEventListener('mouseup', () => {
-            isDragging = false;
-        });
 
         // --- Event Listeners ---
         generateButton.addEventListener('click', handleStoryGeneration);

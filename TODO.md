@@ -1,5 +1,16 @@
-- [x] Update API model names in index.html JS
-- [x] Add drag functionality to textarea #promptEditor
+- [x] Update API model names in index.html JS (updated to gemini-2.0-flash)
+- [x] Make textarea resizable in all directions (using resize: both)
 - [x] Modify TTS function to handle unsupported feature
-- [ ] Test drag and resize
-- [ ] Test tool buttons (fix any JS errors)
+- [x] Fix file corruption (removed extra characters)
+- [x] Ensure tool button modals have editable inputs
+- [x] Fix JavaScript syntax error in setLoading function
+- [x] Update API key to the one provided by user
+- [x] Fix API payload structure for gemini-2.0-flash (removed systemInstruction)
+- [x] Save API key to localStorage to persist across sessions
+- [x] Fix handleProfileGeneration and handleDialogueGeneration to open modals first
+- [x] Fix handleQueryPdfGeneration to open modal first
+- [x] Add close buttons (X) to all tool modals
+- [x] Fix HTML typo in profileModal label
+- [x] Fix HTML typo in dialogueModal label
+- [x] Test resize functionality (user verified)
+- [x] Test tool buttons (user verified with valid API key)
