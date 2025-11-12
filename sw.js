@@ -2,12 +2,10 @@
 const CACHE_NAME = 'fic-writer-pro-v2'; // Cambiado a v2 para forzar la actualización de caché
 
 // **¡AJUSTA ESTA LÍNEA SI TU REPOSITORIO NO SE LLAMA 'fic-writer-app'!**
-const REPO_PREFIX = '/fic-writer-app/'; 
+const REPO_PREFIX = '/'; // Cambiado a root para evitar problemas de cache
 
-// Archivos principales a guardar en caché
+// Archivos principales a guardar en caché (solo recursos estáticos, no index.html para evitar problemas de actualización)
 const urlsToCache = [
-  REPO_PREFIX,
-  REPO_PREFIX + 'index.html',
   REPO_PREFIX + 'manifest.json'
 ];
 

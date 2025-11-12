@@ -14,3 +14,5 @@
 - [x] Fix HTML typo in dialogueModal label
 - [x] Test resize functionality (user verified)
 - [x] Test tool buttons (user verified with valid API key)
+- [x] Add button to select and apply plot twist to prompt
+- [ ] Modify story display to show in pages (up to 20000 words per page) with navigation
