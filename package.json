@@ -1,0 +1,16 @@
+{
+  "name": "fic-writer-pro",
+  "version": "1.1.0",
+  "description": "Tu asistente de IA para crear increíbles historias y fanfics.",
+  "main": "index.html",
+  "scripts": {
+    "build-css": "tailwindcss -i ./src/input.css -o ./dist/output.css --watch",
+    "build-css-prod": "tailwindcss -i ./src/input.css -o ./dist/output.css --minify"
+  },
+  "devDependencies": {
+    "tailwindcss": "^3.4.0"
+  },
+  "keywords": ["ai", "writing", "fiction", "gemini"],
+  "author": "ElenaG-E",
+  "license": "MIT"
+}

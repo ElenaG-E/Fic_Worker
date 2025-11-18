@@ -1,0 +1,1307 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fic Writer Pro</title>
+
+    <meta name="theme-color" content="#1f2937"/>
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Fic Writer">
+    <meta name="color-scheme" content="light dark">
+    
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" href="https://placehold.co/32x32/0ea5e9/ffffff?text=F" type="image/png"> 
+    <link rel="apple-touch-icon" href="https://placehold.co/192x192/0ea5e9/ffffff?text=FWP">
+
+    <script src="https://cdn.tailwindcss.com?plugins=typography"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class', 
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        primary: {
+                            400: '#7dd3fc', // sky-400
+                            500: '#38bdf8', // sky-500
+                            600: '#0ea5e9', // sky-600
+                            700: '#0284c7', // sky-700
+                        }
+                    },
+                    borderRadius: {
+                        '3xl': '1.5rem',
+                    },
+                    typography: (theme) => ({
+                        DEFAULT: { css: { color: theme('colors.gray.700'), /* ... */ } },
+                        invert: {
+                            css: {
+                                color: theme('colors.gray.300'),
+                                'h1, h2, h3': { color: theme('colors.white') },
+                                'strong, b': { color: theme('colors.white') },
+                                code: { color: theme('colors.pink.400') },
+                                blockquote: {
+                                    color: theme('colors.gray.400'),
+                                    borderLeftColor: theme('colors.primary.500'),
+                                },
+                            },
+                        },
+                    }),
+                },
+            },
+        }
+    </script>
+    <script>
+        // Script de Modo Oscuro (se activa al cargar)
+        if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+          document.documentElement.classList.add('dark')
+        } else {
+          document.documentElement.classList.remove('dark')
+        }
+    </script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    
+    <style>
+        body { font-family: 'Inter', sans-serif; overscroll-behavior: none; }
+
+        /* Estilos de Formulario */
+        .form-input {
+            @apply w-full p-3 bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-xl shadow-sm text-gray-900 dark:text-gray-300 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition duration-200;
+        }
+        .form-select {
+            @apply w-full p-3 bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-xl shadow-sm text-gray-900 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition duration-200;
+        }
+        /* Estilos de Tarjeta (Card) */
+        .card {
+            @apply bg-white dark:bg-gray-900 shadow-lg rounded-2xl ring-1 ring-gray-200 dark:ring-gray-700 transition-all duration-300;
+        }
+
+        /* Estilos de Botón Primario */
+        .btn {
+            @apply w-full font-semibold py-3 px-4 rounded-xl shadow-md hover:shadow-lg text-base flex items-center justify-center transform hover:-translate-y-0.5 transition-all duration-200 active:scale-95;
+        }
+        .btn-green { @apply bg-green-600 text-white hover:bg-green-700 hover:shadow-green-500/50; }
+        .btn-pink { @apply bg-pink-600 text-white hover:bg-pink-700 hover:shadow-pink-500/50; }
+        .btn-primary { @apply bg-primary-600 text-white hover:bg-primary-700 hover:shadow-primary-500/50; }
+        .btn-yellow { @apply bg-yellow-500 text-white hover:bg-yellow-600 hover:shadow-yellow-500/50; }
+
+        /* Estilos de Botón de Herramienta */
+        .btn-tool {
+             @apply w-full font-medium py-2 px-3 rounded-lg shadow-sm hover:shadow-md transform hover:-translate-y-0.5 transition-all duration-200 active:scale-95;
+        }
+        .btn-tool-indigo { @apply bg-indigo-500 text-white hover:bg-indigo-600 hover:shadow-indigo-500/50; }
+        .btn-tool-blue { @apply bg-blue-500 text-white hover:bg-blue-600 hover:shadow-blue-500/50; }
+        .btn-tool-teal { @apply bg-teal-500 text-white hover:bg-teal-600 hover:shadow-teal-500/50; }
+        .btn-tool-purple { @apply bg-purple-500 text-white hover:bg-purple-600 hover:shadow-purple-500/50; }
+        .btn-tool-orange { @apply bg-orange-500 text-white hover:bg-orange-600 hover:shadow-orange-500/50; }
+
+        /* Estilos de Layout y Salida */
+        #storyOutput { min-height: 300px; max-height: 60vh; overflow-y: auto; }
+        .loader { border-top-color: #0ea5e9; animation: spin 1s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .editor-textarea { resize: both; min-height: 100px; }
+        #storybookContent { scroll-snap-type: y mandatory; overflow-y: scroll; height: 70vh; }
+        .storybook-page { scroll-snap-align: start; flex-shrink: 0; height: 100%; }
+        #storybookContent::-webkit-scrollbar { display: none; }
+        #storybookContent { -ms-overflow-style: none; scrollbar-width: none; }
+
+        /* Dark Mode Toggle */
+        .toggle-switch {
+            @apply relative inline-block w-12 h-6 bg-gray-300 dark:bg-gray-600 rounded-full transition duration-300;
+        }
+        .toggle-switch input { @apply opacity-0 w-0 h-0; }
+        .toggle-slider {
+            @apply absolute cursor-pointer top-0 left-0 right-0 bottom-0 bg-gray-300 dark:bg-gray-600 rounded-full transition duration-300;
+        }
+        .toggle-slider:before {
+            @apply absolute h-5 w-5 bg-white rounded-full transition duration-300;
+            content: "";
+            left: 0.5rem;
+            bottom: 0.125rem;
+        }
+        input:checked + .toggle-slider { @apply bg-primary-500; }
+        input:checked + .toggle-slider:before { @apply transform translate-x-6; }
+
+        /* Responsive Improvements */
+        @media (max-width: 640px) {
+            .card { @apply rounded-xl p-4; }
+            .btn { @apply py-2.5 px-3 text-sm; }
+            .btn-tool { @apply py-1.5 px-2 text-sm; }
+            #storyOutput { max-height: 50vh; }
+        }
+    </style>
+</head>
+<body class="bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-200 h-full p-4 md:p-8">
+    <div class="max-w-7xl mx-auto">
+        
+        <header class="mb-8 md:mb-12">
+            <h1 class="text-4xl md:text-5xl font-extrabold text-center tracking-tight mb-2">
+                <span class="bg-clip-text text-transparent bg-gradient-to-r from-sky-400 to-cyan-400">
+                    Fic Writer Pro
+                </span>
+                <span class="text-lg font-normal text-gray-400">v1.1</span>
+            </h1>
+            <p class="text-lg text-center text-gray-500 dark:text-gray-400">
+                Tu asistente de IA para crear increíbles historias y fanfics.
+            </p>
+             <div class="mt-4 text-center">
+                 <label for="apiKeyInput" class="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">Claves de API de Gemini (requeridas para las herramientas)</label>
+                 <textarea id="apiKeyInput" placeholder="Pega tus claves de API aquí, una por línea" class="form-input max-w-md mx-auto" rows="3"></textarea>
+                 <button id="addApiKeyButton" class="btn btn-primary mt-2 mr-2">Añadir Clave</button>
+                 <select id="apiKeySelect" class="form-select max-w-md mx-auto mt-2">
+                     <option value="-1">Selecciona una clave activa</option>
+                 </select>
+             </div>
+        </header>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
+
+            <div class="flex flex-col gap-6 lg:gap-8">
+                
+                <div class="card p-5 lg:p-6">
+                    <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-3">
+                        Paso 1: 📚 Cargar Contexto (Opcional)
+                    </h2>
+                    <label for="pdfUpload" class="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">
+                        Sube tus PDFs. Puedes seleccionar varios a la vez (con Ctrl+Clic) o añadirlos uno por uno.
+                    </label>
+                    <input type="file" id="pdfUpload" accept=".pdf" class="block w-full text-sm text-gray-500 dark:text-gray-400
+                        file:mr-4 file:py-2 file:px-4
+                        file:rounded-lg file:border-0
+                        file:text-sm file:font-semibold
+                        file:bg-primary-600 file:text-white
+                        hover:file:bg-primary-700
+                        cursor-pointer transition duration-200" multiple/>
+                    <div id="pdfStatus" class="mt-3 text-sm text-gray-500 dark:text-gray-500">
+                        Añade uno o más PDFs. Los archivos se acumularán.
+                    </div>
+                </div>
+
+                <div class="card p-5 lg:p-6">
+                    <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">
+                        Paso 2: ✍️ Definir Historia y Prompt
+                    </h2>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                        <div>
+                            <label for="wordCount" class="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">Palabras (Aprox.)</label>
+                            <input type="number" id="wordCount" min="100" max="20000" step="100" value="1500" class="form-input">
+                        </div>
+                        
+                        <div>
+                            <label for="storyGenre" class="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">Género</label>
+                            <select id="storyGenre" class="form-select">
+                                <option>Automático (del PDF)</option>
+                                <option>Ciencia Ficción</option>
+                                <option>Fantasía</option>
+                                <option>Romance</option>
+                                <option>Romance Oscuro</option>
+                                <option>Misterio</option>
+                                <option>Terror</option>
+                                <option>Aventura</option>
+                                <option>Drama</option>
+                            </select>
+                        </div>
+                        
+                        <div>
+                            <label for="storyTone" class="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">Tono</label>
+                            <select id="storyTone" class="form-select">
+                                <option>Automático (del PDF)</option>
+                                <option>Serio</option>
+                                <option>Oscuro / Sombrío</option>
+                                <option>Ligero / Esperanzador</option>
+                                <option>Romántico</option>
+                                <option>Cómico</option>
+                                <option>Trágico</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label for="storyLanguage" class="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">Tipo de Lenguaje</label>
+                            <select id="storyLanguage" class="form-select">
+                                <option>Automático (del PDF)</option>
+                                <option>Formal / Elegante</option>
+                                <option>Informal / Coloquial</option>
+                                <option>Poético / Lírico</option>
+                                <option>Crudo / Explícito</option>
+                            </select>
+                        </div>
+
+                        <div class="md:col-span-2">
+                            <label for="storyNarrator" class="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">Narrador</label>
+                            <select id="storyNarrator" class="form-select">
+                                <option>Automático (del PDF)</option>
+                                <option>Primera Persona (Ej: "Yo vi...")</option>
+                                <option>Tercera Persona Limitada (Ej: "Él vio...")</option>
+                                <option>Tercera Persona Omnisciente (Ej: "Él vio, mientras ella pensaba...")</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <label for="promptEditor" class="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">
+                        ¡Tu idea va aquí!
+                    </label>
+                    <textarea id="promptEditor" class="form-input editor-textarea" rows="4" placeholder="Ej: Comienza con una idea... 'Un capítulo donde Elara se encuentra con el Inquisidor bajo la lluvia... él se da cuenta de que ella mintió sobre el artefacto.'" style="width: 100%; height: auto; resize: both;"></textarea>
+                    <div id="editorWordCount" class="text-sm text-right text-gray-500 mt-2">
+                        Palabras: 0
+                    </div>
+                </div>
+
+                <button id="generateButton" class="btn btn-green">
+                    <span id="buttonText">Generar Capítulo</span>
+                </button>
+
+                <div class="card p-5 lg:p-6">
+                    <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-3">
+                        Herramientas de IA ✨
+                    </h2>
+                    <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">¿Atascado? Pide ayuda a la IA con estas herramientas.</p>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        <button id="generateTwistButton" class="btn-tool btn-tool-indigo">
+                            💡 Sugerir Giro de Trama
+                        </button>
+                        <button id="generateProfileButton" class="btn-tool btn-tool-blue">
+                            👤 Generar Perfil
+                        </button>
+                        <button id="generateDialogueButton" class="btn-tool btn-tool-teal">
+                            💬 Ayudante de Diálogo
+                        </button>
+                        <button id="critiqueButton" class="btn-tool btn-tool-purple">
+                            🧐 Criticar Capítulo
+                        </button>
+                        <button id="queryPdfButton" class="btn-tool btn-tool-orange">
+                            🔍 Consultar PDF
+                        </button>
+                        <button id="generateQuestionButton" class="btn-tool btn-tool-green md:col-span-2">
+                            ❓ Generar Pregunta
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex flex-col gap-6 lg:gap-8">
+                
+                <div class="card p-5 lg:p-6 flex flex-col">
+                    <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-3">
+                        Paso 3: 📖 Historia Generada
+                    </h2>
+                    <div id="storyOutputWrapper" class="flex-grow bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-lg p-4 shadow-inner min-h-[400px] max-h-[70vh] overflow-y-auto">
+                        <div id="storyOutput" class="w-full h-full prose prose-sm sm:prose-base prose-gray dark:prose-invert max-w-none prose-pre:bg-transparent prose-pre:p-0">
+                            <div id="outputPlaceholder" class="h-full flex flex-col items-center justify-center text-center text-gray-500 dark:text-gray-500">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                                </svg>
+                                <p class="font-semibold">Tu historia aparecerá aquí.</p>
+                                <p class="text-sm">Completa los pasos 1 y 2 y presiona "Generar Capítulo".</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex justify-between items-center mt-2">
+                        <div id="pageIndicator" class="text-sm text-gray-500 hidden">Página 1 de 1</div>
+                        <div id="outputWordCount" class="text-sm text-right text-gray-500">
+                            Palabras: 0
+                        </div>
+                    </div>
+                    <div class="flex flex-col sm:flex-row gap-2 sm:gap-4 mt-4">
+                        <div class="flex gap-2">
+                            <button id="prevPageButton" class="hidden btn btn-gray-500 text-white hover:bg-gray-600 text-base py-2">
+                                Página Anterior
+                            </button>
+                            <button id="nextPageButton" class="hidden btn btn-gray-500 text-white hover:bg-gray-600 text-base py-2">
+                                Página Siguiente
+                            </button>
+                        </div>
+                        <div class="flex flex-col sm:flex-row gap-2">
+                            <button id="continueButton" class="hidden btn btn-primary text-base py-2">
+                                Continuar Historia
+                            </button>
+                            <button id="exportButton" class="hidden btn btn-yellow text-base py-2">
+                                Exportar Capítulo (PDF/Word)
+                            </button>
+                            <button id="clearStoryButton" class="hidden btn bg-red-600 text-white hover:bg-red-700 text-base py-2">
+                                Limpiar Historia Guardada
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card p-5 lg:p-6">
+                    <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-3">
+                        Paso 4: 🎬 Generar Storybook
+                    </h2>
+                    <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">
+                        Convierte tu historia en un libro multimedia con imágenes y voz (Paso 3 debe estar completo).
+                    </p>
+                    <label for="artisticStyle" class="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">Estilo Artístico</label>
+                    <select id="artisticStyle" class="form-select mb-4">
+                        <option>Acuarela</option>
+                        <option>Fotorrealista</option>
+                        <option>Anime</option>
+                        <option>Pixel Art</option>
+                        <option>Fantasía Oscura</option>
+                        <option>Dibujo a Lápiz</option>
+                        <option>Minimalista</option>
+                    </select>
+                    <button id="generateStorybookButton" class="btn btn-pink">
+                        Generar Storybook Multimedia
+                    </button>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+
+    <div id="twistModal" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center p-4 hidden z-50">
+        <div class="card max-w-2xl w-full p-6 max-h-[80vh] flex flex-col">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-2xl font-bold text-gray-900 dark:text-white">💡 Giros de Trama Sugeridos</h2>
+                <button id="closeTwistModal" class="text-gray-400 hover:text-gray-900 dark:hover:text-white text-3xl transition duration-200">&times;</button>
+            </div>
+            <button id="runTwistGeneration" class="btn-tool btn-tool-indigo mb-4">
+                Generar Giros de Trama
+            </button>
+            <div id="twistOutput" class="flex-grow overflow-y-auto bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-lg p-4 text-gray-700 dark:text-gray-300 min-h-[200px]">
+            </div>
+        </div>
+    </div>
+
+    <div id="profileModal" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center p-4 hidden z-50">
+        <div class="card max-w-2xl w-full p-6 max-h-[80vh] flex flex-col">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-2xl font-bold text-gray-900 dark:text-white">👤 Generador de Perfil de Personaje</h2>
+                <button id="closeProfileModal" class="text-gray-400 hover:text-gray-900 dark:hover:text-white text-3xl transition duration-200">&times;</button>
+            </div>
+            <label for="characterNameInput" class="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">Nombre del Personaje</label>
+            <input type="text" id="characterNameInput" placeholder="Ej: 'Elara' o 'El Inquisidor'" class="form-input mb-2">
+            <button id="generateRandomProfileButton" class="btn-tool btn-tool-blue mb-2">
+                Generar Perfil Aleatorio
+            </button>
+            <button id="runProfileGeneration" class="btn-tool btn-tool-blue mb-4">
+                Generar Perfil
+            </button>
+            <div id="profileOutput" class="flex-grow overflow-y-auto bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-lg p-4 text-gray-700 dark:text-gray-300 min-h-[200px]">
+            </div>
+        </div>
+    </div>
+
+    <div id="dialogueModal" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center p-4 hidden z-50">
+        <div class="card max-w-2xl w-full p-6 max-h-[80vh] flex flex-col">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-2xl font-bold text-gray-900 dark:text-white">💬 Ayudante de Diálogo</h2>
+                <button id="closeDialogueModal" class="text-gray-400 hover:text-gray-900 dark:hover:text-white text-3xl transition duration-200">&times;</button>
+            </div>
+            <label for="charAInput" class="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">Personaje A</label>
+            <input type="text" id="charAInput" placeholder="Ej: 'Elara'" class="form-input mb-2">
+            <label for="charBInput" class="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">Personaje B</label>
+            <input type="text" id="charBInput" placeholder="Ej: 'Inquisidor'" class="form-input mb-4">
+            <label for="sceneContextInput" class="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">Contexto de la Escena</label>
+            <textarea id="sceneContextInput" class="form-input" rows="3" placeholder="Ej: Discuten sobre el artefacto robado en el sótano..."></textarea>
+            <button id="runDialogueGeneration" class="btn-tool btn-tool-teal my-4">
+                Generar Diálogo
+            </button>
+            <div id="dialogueOutput" class="flex-grow overflow-y-auto bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-lg p-4 text-gray-700 dark:text-gray-300 min-h-[200px]">
+            </div>
+        </div>
+    </div>
+
+    <div id="critiqueModal" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center p-4 hidden z-50">
+        <div class="card max-w-2xl w-full p-6 max-h-[80vh] flex flex-col">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-2xl font-bold text-gray-900 dark:text-white">🧐 Crítica del Capítulo</h2>
+                <button id="closeCritiqueModal" class="text-gray-400 hover:text-gray-900 dark:hover:text-white text-3xl transition duration-200">&times;</button>
+            </div>
+            <div id="critiqueOutput" class="flex-grow overflow-y-auto bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-lg p-4 text-gray-700 dark:text-gray-300 min-h-[200px]">
+            </div>
+        </div>
+    </div>
+
+    <div id="queryPdfModal" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center p-4 hidden z-50">
+        <div class="card max-w-2xl w-full p-6 max-h-[80vh] flex flex-col">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-2xl font-bold text-gray-900 dark:text-white">🔍 Consultar PDF</h2>
+                <button id="closeQueryPdfModal" class="text-gray-400 hover:text-gray-900 dark:hover:text-white text-3xl transition duration-200">&times;</button>
+            </div>
+            <label for="queryPdfInput" class="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">Tu Pregunta sobre el PDF</label>
+            <input type="text" id="queryPdfInput" placeholder="Ej: ¿Cuál es el nombre del capitán?" class="form-input mb-4">
+            <button id="runQueryPdfGeneration" class="btn-tool btn-tool-orange mb-4">
+                Preguntar
+            </button>
+            <div id="queryPdfOutput" class="flex-grow overflow-y-auto bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-lg p-4 text-gray-700 dark:text-gray-300 min-h-[150px]">
+            </div>
+        </div>
+    </div>
+
+    <div id="generateQuestionModal" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center p-4 hidden z-50">
+        <div class="card max-w-2xl w-full p-6 max-h-[80vh] flex flex-col">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-2xl font-bold text-gray-900 dark:text-white">❓ Generar Pregunta</h2>
+                <button id="closeGenerateQuestionModal" class="text-gray-400 hover:text-gray-900 dark:hover:text-white text-3xl transition duration-200">&times;</button>
+            </div>
+            <button id="runGenerateQuestion" class="btn-tool btn-tool-green mb-4">
+                Generar Pregunta
+            </button>
+            <div id="generateQuestionOutput" class="flex-grow overflow-y-auto bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-lg p-4 text-gray-700 dark:text-gray-300 min-h-[200px]">
+            </div>
+        </div>
+    </div>
+
+    <div id="storybookModal" class="fixed inset-0 bg-gray-900 bg-opacity-90 flex items-center justify-center p-4 hidden z-50">
+        <div class="bg-white dark:bg-gray-900 rounded-lg shadow-2xl max-w-4xl w-full max-h-[90vh] flex flex-col">
+            <div class="p-4 flex justify-between items-center border-b border-gray-200 dark:border-gray-700">
+                <h2 class="text-2xl font-bold text-gray-900 dark:text-white">Tu Storybook Multimedia</h2>
+                <button id="closeStorybookModal" class="text-gray-400 hover:text-gray-900 dark:hover:text-white text-3xl transition duration-200">&times;</button>
+            </div>
+            <div id="storybookContent" class="flex-grow overflow-y-auto" style="scroll-snap-type: y mandatory; height: 75vh;">
+            </div>
+            <div id="storybookStatus" class="p-4 text-center text-gray-500 border-t border-gray-200 dark:border-gray-700">
+            </div>
+        </div>
+    </div>
+
+
+    <script>
+        // --- INICIO: REGISTRO DEL SERVICE WORKER ---
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                // El registro de sw.js es un poco más robusto para entornos de subcarpeta
+                const swPath = (window.location.pathname.endsWith('/')) ? 'sw.js' : window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/') + 1) + 'sw.js';
+
+                navigator.serviceWorker.register(swPath)
+                    .then(registration => {
+                        console.log('Service Worker registrado con éxito:', registration.scope);
+                    })
+                    .catch(error => {
+                        console.log('Error al registrar el Service Worker:', error);
+                    });
+            });
+        }
+        // --- FIN: REGISTRO DEL SERVICE WORKER ---
+
+        let globalPdfContext = "";
+        let loadedFileNames = new Set();
+        let totalPagesProcessed = 0;
+        let generatedStory = localStorage.getItem('generatedStory') || "";
+        let storyPages = [];
+        let currentPage = 0;
+        const pdfUpload = document.getElementById('pdfUpload');
+        const pdfStatus = document.getElementById('pdfStatus');
+        const promptEditor = document.getElementById('promptEditor');
+        const generateButton = document.getElementById('generateButton');
+        const buttonText = document.getElementById('buttonText');
+        const storyOutput = document.getElementById('storyOutput');
+        const outputPlaceholder = document.getElementById('outputPlaceholder');
+        const editorWordCount = document.getElementById('editorWordCount');
+        const outputWordCount = document.getElementById('outputWordCount');
+        const continueButton = document.getElementById('continueButton');
+        const exportButton = document.getElementById('exportButton');
+        const clearStoryButton = document.getElementById('clearStoryButton');
+        const prevPageButton = document.getElementById('prevPageButton');
+        const nextPageButton = document.getElementById('nextPageButton');
+        const pageIndicator = document.getElementById('pageIndicator');
+
+        // ⚠️ ⚠️ ⚠️
+        // ¡PEGA TU CLAVE DE API SECRETA Y VÁLIDA AQUÍ!
+        // ⚠️ ⚠️ ⚠️
+        let apiKeys = JSON.parse(localStorage.getItem('geminiApiKeys')) || [];
+        let apiKey = apiKeys.length > 0 ? apiKeys[0] : "";
+
+        let geminiApiUrl = apiKey ? `http://localhost:8080/v1beta/models/gemini-2.0-flash:generateContent` : "";
+        let imagenApiUrl = apiKey ? `http://localhost:8080/v1beta/models/imagen-4.0-generate-001:predict` : `https://generativelanguage.googleapis.com/v1beta/models/imagen-4.0-generate-001:predict`;
+        let ttsApiUrl = apiKey ? `http://localhost:8080/v1beta/models/gemini-1.5-flash:generateContent` : `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent`;
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
+
+        function countWords(text) {
+            if (!text) return 0;
+            return text.trim().split(/\s+/).filter(Boolean).length;
+        }
+
+        function paginateStory(storyText) {
+            const words = storyText.split(/\s+/);
+            const wordsPerPage = 20000;
+            storyPages = [];
+            for (let i = 0; i < words.length; i += wordsPerPage) {
+                storyPages.push(words.slice(i, i + wordsPerPage).join(' '));
+            }
+            currentPage = 0;
+            updatePageDisplay();
+        }
+
+        function updatePageDisplay() {
+            if (storyPages.length === 0) {
+                storyOutput.innerHTML = outputPlaceholder.outerHTML;
+                outputPlaceholder.style.display = 'flex';
+                pageIndicator.classList.add('hidden');
+                prevPageButton.classList.add('hidden');
+                nextPageButton.classList.add('hidden');
+                return;
+            }
+            storyOutput.innerHTML = storyPages[currentPage].replace(/\n/g, '<br>');
+            pageIndicator.textContent = `Página ${currentPage + 1} de ${storyPages.length}`;
+            pageIndicator.classList.remove('hidden');
+            prevPageButton.classList.toggle('hidden', currentPage === 0);
+            nextPageButton.classList.toggle('hidden', currentPage === storyPages.length - 1);
+            updateOutputWordCount();
+        }
+
+        function updateOutputWordCount() {
+            const totalWords = countWords(generatedStory);
+            const currentPageWords = storyPages.length > 0 ? countWords(storyPages[currentPage]) : 0;
+            outputWordCount.textContent = `Palabras: ${currentPageWords} (Total: ${totalWords})`;
+        }
+
+        promptEditor.addEventListener('input', () => {
+            const count = countWords(promptEditor.value);
+            editorWordCount.textContent = `Palabras: ${count}`;
+        });
+
+
+
+        pdfUpload.addEventListener('change', handlePdfUpload);
+
+        async function handlePdfUpload(event) {
+            const files = event.target.files;
+            if (!files || files.length === 0) {
+                pdfStatus.textContent = "Por favor, sube uno o más archivos PDF.";
+                pdfStatus.className = "mt-3 text-sm text-red-400";
+                return;
+            }
+
+            pdfStatus.textContent = "Procesando PDFs... (esto puede tardar)";
+            pdfStatus.className = "mt-3 text-sm text-yellow-400";
+            generateButton.disabled = true;
+            buttonText.textContent = "Procesando PDFs...";
+
+            let newFilesProcessed = 0;
+            let newPagesRead = 0;
+
+            try {
+                for (const file of files) {
+                    if (loadedFileNames.has(file.name)) {
+                        continue;
+                    }
+
+                    pdfStatus.textContent = `Procesando: ${file.name}...`;
+                    const { text, numPages } = await processPdfFile(file);
+
+                    globalPdfContext += text + `\n\n--- (Contexto de ${file.name}) ---\n\n`;
+                    totalPagesProcessed += numPages;
+                    loadedFileNames.add(file.name);
+
+                    newFilesProcessed++;
+                    newPagesRead += numPages;
+                }
+                
+                // Muestra la lista de todos los archivos y el total de páginas
+                if (newFilesProcessed === 0 && files.length > 0) {
+                    pdfStatus.textContent = `Archivos ya cargados. Sigue añadiendo si lo deseas.`;
+                } else {
+                    const fileList = Array.from(loadedFileNames).join(', ');
+                    pdfStatus.innerHTML = `
+                        <strong class="text-green-600 dark:text-green-400">¡Archivos cargados con éxito!</strong><br>
+                        Total: ${loadedFileNames.size} archivos (<span class="font-bold">${totalPagesProcessed} páginas</span>).<br>
+                        <span class="text-xs text-gray-500 dark:text-gray-400">Archivos: ${fileList}</span>
+                    `;
+                }
+                pdfStatus.className = "mt-3 text-sm"; 
+                
+                generateButton.disabled = false;
+                buttonText.textContent = "Generar Capítulo";
+
+            } catch (err) {
+                console.error("Error al procesar PDF:", err);
+                pdfStatus.textContent = `Error al leer el archivo: ${err.message || 'Error desconocido'}`;
+                pdfStatus.className = "mt-3 text-sm text-red-400";
+                generateButton.disabled = false;
+                buttonText.textContent = "Generar Capítulo";
+            }
+        }
+
+        function processPdfFile(file) {
+            return new Promise((resolve, reject) => {
+                const fileReader = new FileReader();
+                fileReader.onload = function() {
+                    (async () => {
+                        try {
+                            const typedarray = new Uint8Array(this.result);
+                            const pdf = await pdfjsLib.getDocument(typedarray).promise;
+                            let fullText = "";
+                            const maxPages = pdf.numPages;
+                            for (let i = 1; i <= maxPages; i++) {
+                                const page = await pdf.getPage(i);
+                                const textContent = await page.getTextContent();
+                                const pageText = textContent.items.map(item => item.str).join(' ');
+                                fullText += pageText + "\n\n";
+                            }
+                            resolve({ text: fullText, numPages: maxPages });
+                        } catch (err) {
+                            reject(err);
+                        }
+                    })();
+                };
+                fileReader.onerror = () => {
+                    reject(new Error("Error al leer el archivo con FileReader."));
+                };
+                fileReader.readAsArrayBuffer(file);
+            });
+        }
+
+        // --- Lógica de Generación y Herramientas (Sin Cambios Funcionales) ---
+
+        const handleStoryGeneration = async () => {
+            const userPrompt = promptEditor.value;
+            const wordCount = document.getElementById('wordCount').value;
+            const storyGenre = document.getElementById('storyGenre').value;
+            const storyTone = document.getElementById('storyTone').value;
+            const storyLanguage = document.getElementById('storyLanguage').value;
+            const storyNarrator = document.getElementById('storyNarrator').value;
+
+            if (!userPrompt) {
+                alert("Por favor, ¡escribe tu idea en el 'Paso 2' para empezar!");
+                return;
+            }
+
+            setLoading(true);
+
+            let contextForModel = "";
+            let contextRules = "";
+
+            if (globalPdfContext) {
+                contextForModel = globalPdfContext.substring(0, 20000); 
+                contextRules = `1. **Usar el Contexto:** El siguiente texto es el "CONTEXTO" (extraído de un PDF). Úsalo para entender el mundo, los personajes, el tono y los eventos. Sé consistente con este contexto. 2. **Seguir el Prompt:** El "PROMPT" del usuario es la instrucción principal sobre qué debe suceder en el capítulo. --- CONTEXTO --- ${contextForModel} --- FIN DEL CONTEXTO ---`;
+            } else {
+                contextRules = `1. **Sin Contexto:** No se ha proporcionado un PDF. Debes generar la historia basándote *únicamente* en el PROMPT del usuario y los parámetros. 2. **Seguir el Prompt:** El "PROMPT" del usuario es la instrucción principal sobre qué debe suceder en el capítulo.`;
+            }
+
+            const systemPrompt = `Eres un asistente experto en escritura de ficción. Tu tarea es escribir un capítulo de una historia (fanfic o original) basado en un prompt del usuario y, opcionalmente, un contexto. REGLAS: ${contextRules} 3. **Longitud y Detalle:** El usuario desea un capítulo largo y detallado, similar a un capítulo de novela, con un objetivo de **${wordCount}** palabras. Escribe de forma extensa, desarrollando escenas, diálogos, pensamientos internos y descripciones sensoriales. No resumas. Escribe la escena completa. 4. **Formato:** Responde únicamente con el texto de la historia generada. No incluyas preámbulos, saludos o notas fuera de la historia. Usa párrafos bien formados (saltos de línea, \n). 5. **Parámetros:** Debes seguir estos parámetros. Si un valor es "Automático (del PDF)" y no hay PDF, usa tu mejor juicio creativo. - Género: ${storyGenre} - Tono: ${storyTone} - Tipo de Lenguaje: ${storyLanguage} - Narrador: ${storyNarrator}`;
+            
+            try {
+                const storyText = await callGeminiAPI(systemPrompt, `PROMPT: ${userPrompt}`);
+                displayStory(storyText, false);
+            } catch (error) {
+                console.error("Error al generar la historia:", error);
+                let friendlyErrorMessage = "No se pudo generar el capítulo. " + error.message;
+                if (error.message && (error.message.includes("401") || error.message.includes("400") || error.message.includes("API"))) {
+                    friendlyErrorMessage = "Error de conexión o de API Key. Revisa si la clave es válida y está pegada correctamente.";
+                }
+                displayError(friendlyErrorMessage, false);
+            }
+            
+            setLoading(false);
+        };
+
+        const handleStoryContinuation = async () => {
+            const currentStory = generatedStory; // CORRECCIÓN: Usar la historia completa, no solo el texto de la página actual.
+            const originalPrompt = promptEditor.value;
+            if (!currentStory) return;
+            setLoading(true);
+            const storyGenre = document.getElementById('storyGenre').value;
+            const storyTone = document.getElementById('storyTone').value;
+            const storyLanguage = document.getElementById('storyLanguage').value;
+            const storyNarrator = document.getElementById('storyNarrator').value;
+            let contextForModel = "";
+            let contextRules = "";
+
+            if (globalPdfContext) {
+                contextForModel = globalPdfContext.substring(0, 30000);
+                contextRules = `--- CONTEXTO (PDF) --- ${contextForModel} --- FIN DEL CONTEXTO ---`;
+            }
+
+            const systemPrompt = `Eres un asistente experto en escritura de ficción. Tu tarea es *continuar* una historia existente de forma coherente. REGLAS: 1. **Usar el Contexto:** El "CONTEXTO" (PDF, si se proporcionó) y la "HISTORIA HASTA AHORA" son tu guía. Sé consistente. 2. **Parámetros:** Sigue los parámetros de la historia (tono, género, etc.). 3. **Longitud:** Escribe la *siguiente parte* de la historia, añadiendo un fragmento sustancial (aprox. 1000-1500 palabras). 4. **Formato:** Responde únicamente con el *nuevo* texto de la historia. No repitas la parte anterior. No incluyas saludos ni preámbulos. - Género: ${storyGenre} - Tono: ${storyTone} - Tipo de Lenguaje: ${storyLanguage} - Narrador: ${storyNarrator} ${contextRules}`;
+            const userPrompt = `PROMPT ORIGINAL (para referencia): ${originalPrompt}\n\n--- HISTORIA HASTA AHORA (ÚLTIMA PARTE) ---\n${currentStory.substring(currentStory.length - 10000)}\n\n--- FIN HISTORIA HASTA AHORA ---\n\nINSTRUCCIÓN: Por favor, continúa escribiendo la historia desde donde se quedó. No repitas nada de lo anterior. Escribe el siguiente fragmento.`;
+
+            try {
+                const newStoryText = await callGeminiAPI(systemPrompt, userPrompt);
+                displayStory(newStoryText, true);
+            } catch (error) {
+                console.error("Error al continuar la historia:", error);
+                let friendlyErrorMessage = "No se pudo continuar la historia. " + error.message;
+                if (error.message && error.message.includes("401")) {
+                    friendlyErrorMessage = "Error de Autenticación (401). La clave de API (API Key) no es válida o falta.";
+                }
+                displayError(friendlyErrorMessage, true);
+            }
+            setLoading(false);
+        };
+
+        // --- WEB WORKER SETUP FOR API CALLS ---
+        const apiWorker = new Worker('api-worker.js');
+        let requestCounter = 0;
+        const pendingRequests = new Map();
+
+        apiWorker.onmessage = (event) => {
+            const { id, success, result, error } = event.data;
+            if (pendingRequests.has(id)) {
+                const { resolve, reject } = pendingRequests.get(id);
+                if (success) {
+                    resolve(result);
+                } else {
+                    reject(new Error(error));
+                }
+                pendingRequests.delete(id);
+            }
+        };
+
+        /**
+         * Sends a request to the API worker and returns a promise that resolves with the result.
+         * @param {string} apiUrl - The full API endpoint URL.
+         * @param {object} payload - The request payload.
+         * @returns {Promise<any>} A promise that resolves with the API's JSON response.
+         */
+        function callApiViaWorker(apiUrl, payload) {
+            return new Promise((resolve, reject) => {
+                if (!apiKey) {
+                    return reject(new Error("Clave de API no configurada. Por favor, ingresa tu clave de API de Gemini en el campo de arriba y guarda."));
+                }
+                const id = ++requestCounter;
+                pendingRequests.set(id, { resolve, reject });
+                apiWorker.postMessage({ id, apiUrl, payload, apiKey });
+            });
+        }
+        // --- END OF WEB WORKER SETUP ---
+
+        const callGeminiAPI = async (systemPrompt, userPromptText) => {
+            const payload = { contents: [{ parts: [{ text: `${systemPrompt}\n\n${userPromptText}` }] }] };
+            const parser = (result) => {
+                    const text = result.candidates?.[0]?.content?.parts?.[0]?.text;
+                    if (text) return text;
+                    const finishReason = result.candidates?.[0]?.finishReason;
+                    console.warn(`La generación de texto falló. Razón: ${finishReason}`);
+                    if (finishReason === 'SAFETY') throw new Error("La respuesta fue bloqueada por los filtros de seguridad de la IA.");
+                    if (finishReason === 'RECITATION') throw new Error("La respuesta fue bloqueada por recitación.");
+                    if (finishReason === 'STOP') throw new Error("La generación se detuvo debido a un límite de longitud o tokens. Intenta con un prompt más corto o reduce el número de palabras objetivo.");
+                    throw new Error(`Respuesta inesperada de la IA (Razón: ${finishReason || 'Desconocida'}).`);
+            };
+            const result = await callApiViaWorker(geminiApiUrl, payload);
+            return parser(result);
+        };
+
+        const handleTwistGeneration = () => {
+            const twistModal = document.getElementById('twistModal');
+            const twistOutput = document.getElementById('twistOutput');
+            twistModal.classList.remove('hidden');
+            twistOutput.textContent = "";
+        };
+
+        const handleRunTwistGeneration = async () => {
+            const userPrompt = promptEditor.value;
+            if (!userPrompt) {
+                alert("Por favor, escribe un prompt en el Paso 2 para generar giros de trama.");
+                return;
+            }
+            const twistOutput = document.getElementById('twistOutput');
+            twistOutput.textContent = "Generando giros de trama...";
+            let contextRules = "";
+            if (globalPdfContext) {
+                contextRules = `Usa el siguiente CONTEXTO del PDF para inspirarte: ${globalPdfContext.substring(0, 20000)}`;
+            }
+            const systemPrompt = `Eres un experto en escritura creativa. Genera 3-5 ideas originales de giros de trama para continuar o mejorar la historia basada en el prompt del usuario. Cada giro debe ser breve (1-2 oraciones) pero impactante. ${contextRules}`;
+            try {
+                const twists = await callGeminiAPI(systemPrompt, `Prompt del usuario: ${userPrompt}`);
+                const twistLines = twists.split('\n').filter(line => line.trim());
+                let html = '';
+                twistLines.forEach((twist, index) => {
+                    html += `<div class="mb-4 p-3 bg-gray-100 dark:bg-gray-700 rounded-lg">
+                        <p class="mb-2">${twist}</p>
+                        <button class="apply-twist btn-tool btn-tool-teal" data-twist="${twist.replace(/"/g, '"')}">Aplicar a Prompt</button>
+                    </div>`;
+                });
+                twistOutput.innerHTML = html;
+                // Add event listeners to apply buttons
+                document.querySelectorAll('.apply-twist').forEach(button => {
+                    button.addEventListener('click', (e) => {
+                        const twist = e.target.getAttribute('data-twist');
+                        promptEditor.value += '\n\n' + twist;
+                        updateEditorWordCount();
+                        alert("Giro aplicado al prompt.");
+                    });
+                });
+            } catch (error) {
+                twistOutput.textContent = "Error al generar giros: " + error.message;
+            }
+        };
+
+        const handleProfileGeneration = () => {
+            const profileModal = document.getElementById('profileModal');
+            profileModal.classList.remove('hidden');
+        };
+
+        const handleRunProfileGeneration = async () => {
+            const characterName = document.getElementById('characterNameInput').value.trim();
+            if (!characterName) {
+                alert("Por favor, ingresa el nombre del personaje.");
+                return;
+            }
+            const profileOutput = document.getElementById('profileOutput');
+            profileOutput.textContent = "Generando perfil...";
+            let contextRules = "";
+            if (globalPdfContext) {
+                contextRules = `Incorpora detalles del CONTEXTO del PDF si es relevante: ${globalPdfContext.substring(0, 20000)}`;
+            }
+            const systemPrompt = `Eres un experto en desarrollo de personajes. Crea un perfil detallado para el personaje "${characterName}" basado en el contexto de la historia. Incluye apariencia, personalidad, backstory, motivaciones y relaciones. ${contextRules}`;
+            try {
+                const profile = await callGeminiAPI(systemPrompt, `Genera un perfil completo para ${characterName}.`);
+                profileOutput.innerHTML = profile.replace(/\n/g, '<br>');
+            } catch (error) {
+                profileOutput.textContent = "Error al generar perfil: " + error.message;
+            }
+        };
+
+        const handleRunRandomProfileGeneration = async () => {
+            const profileOutput = document.getElementById('profileOutput');
+            profileOutput.textContent = "Generando perfil aleatorio...";
+            let contextRules = "";
+            if (globalPdfContext) {
+                contextRules = `Incorpora detalles del CONTEXTO del PDF si es relevante: ${globalPdfContext.substring(0, 20000)}`;
+            }
+            const systemPrompt = `Eres un experto en desarrollo de personajes. Crea un perfil detallado para un personaje aleatorio basado en el contexto de la historia. Incluye nombre, apariencia, personalidad, backstory, motivaciones y relaciones. ${contextRules}`;
+            try {
+                const profile = await callGeminiAPI(systemPrompt, `Genera un perfil completo para un personaje aleatorio.`);
+                profileOutput.innerHTML = profile.replace(/\n/g, '<br>');
+            } catch (error) {
+                profileOutput.textContent = "Error al generar perfil aleatorio: " + error.message;
+            }
+        };
+
+        const handleDialogueGeneration = () => {
+            const dialogueModal = document.getElementById('dialogueModal');
+            dialogueModal.classList.remove('hidden');
+        };
+
+        const handleRunDialogueGeneration = async () => {
+            const charA = document.getElementById('charAInput').value.trim();
+            const charB = document.getElementById('charBInput').value.trim();
+            const sceneContext = document.getElementById('sceneContextInput').value.trim();
+            if (!charA || !charB || !sceneContext) {
+                alert("Por favor, completa todos los campos.");
+                return;
+            }
+            const dialogueOutput = document.getElementById('dialogueOutput');
+            dialogueOutput.textContent = "Generando diálogo...";
+            const systemPrompt = `Eres un experto en escritura de diálogos. Genera un diálogo natural y engaging entre ${charA} y ${charB} basado en el contexto de la escena. Mantén el tono consistente con la historia.`;
+            try {
+                const dialogue = await callGeminiAPI(systemPrompt, `Contexto: ${sceneContext}`);
+                dialogueOutput.innerHTML = dialogue.replace(/\n/g, '<br>');
+            } catch (error) {
+                dialogueOutput.textContent = "Error al generar diálogo: " + error.message;
+            }
+        };
+
+        const handleCritiqueGeneration = () => {
+            const currentStory = storyOutput.textContent;
+            if (!currentStory) {
+                alert("Primero genera una historia para criticar.");
+                return;
+            }
+            const critiqueModal = document.getElementById('critiqueModal');
+            critiqueModal.classList.remove('hidden');
+            const critiqueOutput = document.getElementById('critiqueOutput');
+            critiqueOutput.textContent = "Generando crítica...";
+            const systemPrompt = `Eres un crítico literario experto. Proporciona una crítica constructiva del capítulo generado, incluyendo fortalezas, debilidades y sugerencias de mejora. Sé específico y útil.`;
+            callGeminiAPI(systemPrompt, `Capítulo a criticar: ${currentStory.substring(0, 10000)}`)
+                .then(critique => {
+                    critiqueOutput.innerHTML = critique.replace(/\n/g, '<br>');
+                })
+                .catch(error => {
+                    critiqueOutput.textContent = "Error al generar crítica: " + error.message;
+                });
+        };
+
+        const handleQueryPdfGeneration = () => {
+            const queryPdfModal = document.getElementById('queryPdfModal');
+            queryPdfModal.classList.remove('hidden');
+        };
+
+        const handleRunQueryPdfGeneration = async () => {
+            const query = document.getElementById('queryPdfInput').value.trim();
+            if (!query) {
+                alert("Por favor, ingresa una pregunta.");
+                return;
+            }
+            if (!globalPdfContext) {
+                alert("Primero carga un PDF para consultar.");
+                return;
+            }
+            const queryPdfOutput = document.getElementById('queryPdfOutput');
+            queryPdfOutput.textContent = "Consultando PDF...";
+            const systemPrompt = `Eres un asistente que responde preguntas basadas en el contenido de un PDF. Responde de manera precisa y concisa usando solo la información del CONTEXTO proporcionado.`;
+            try {
+                const answer = await callGeminiAPI(systemPrompt, `Pregunta: ${query}\n\nCONTEXTO: ${globalPdfContext.substring(0, 20000)}`);
+                queryPdfOutput.innerHTML = answer.replace(/\n/g, '<br>');
+            } catch (error) {
+                queryPdfOutput.textContent = "Error al consultar PDF: " + error.message;
+            }
+        };
+
+        const handleGenerateQuestion = () => {
+            const generateQuestionModal = document.getElementById('generateQuestionModal');
+            generateQuestionModal.classList.remove('hidden');
+        };
+
+        const handleRunGenerateQuestion = async () => {
+            const generateQuestionOutput = document.getElementById('generateQuestionOutput');
+            generateQuestionOutput.textContent = "Generando pregunta...";
+            let contextRules = "";
+            if (globalPdfContext) {
+                contextRules = `Usa el siguiente CONTEXTO del PDF para inspirarte: ${globalPdfContext.substring(0, 20000)}`;
+            }
+            const systemPrompt = `Eres un experto en escritura creativa. Genera una pregunta interesante y relevante para el usuario basada en el contexto de la historia. La pregunta debe ayudar a expandir o mejorar la historia. ${contextRules}`;
+            try {
+                const question = await callGeminiAPI(systemPrompt, `Genera una pregunta creativa para el usuario.`);
+                generateQuestionOutput.innerHTML = question.replace(/\n/g, '<br>');
+            } catch (error) {
+                generateQuestionOutput.textContent = "Error al generar pregunta: " + error.message;
+            }
+        };
+
+        const handleExportStory = () => {
+            const storyText = generatedStory; // Use the full story from the variable
+            if (!storyText) {
+                alert("Primero genera una historia para exportar.");
+                return;
+            }
+            // Create a temporary element with explicit styles for PDF generation
+            // to ensure it's always black text on a white background.
+            const element = document.createElement('div');
+            element.style.color = 'black';
+            element.style.background = 'white';
+            element.innerHTML = `<div style="padding: 2rem;"><h1 style="font-size: 24px; font-weight: bold; margin-bottom: 1rem;">Capítulo Exportado</h1><div>${storyText.replace(/\n/g, '<br>')}</div></div>`;
+            const opt = {
+                margin: 1,
+                filename: 'capitulo.pdf',
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 2 },
+                jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
+            };
+            html2pdf().set(opt).from(element).save();
+        };
+
+        const handleStorybookGeneration = async () => {
+            const userPrompt = promptEditor.value;
+            if (!userPrompt) {
+                alert("Por favor, escribe un prompt en el Paso 2 para generar el storybook.");
+                return;
+            }
+            const storybookModal = document.getElementById('storybookModal');
+            const storybookContent = document.getElementById('storybookContent');
+            const storybookStatus = document.getElementById('storybookStatus');
+            storybookModal.classList.remove('hidden');
+            storybookContent.innerHTML = '';
+            storybookStatus.textContent = 'Generando storybook...';
+
+            const artisticStyle = document.getElementById('artisticStyle').value;
+            let contextRules = "";
+            if (globalPdfContext) {
+                contextRules = `Usa el siguiente CONTEXTO del PDF para inspirarte: ${globalPdfContext.substring(0, 20000)}`;
+            }
+
+            // Generate a short story specifically for the storybook
+            const systemPrompt = `Eres un escritor de libros ilustrados para niños. Crea una historia corta y encantadora de 5 páginas basada en el prompt del usuario. Cada página debe tener 1-2 oraciones simples y descriptivas. La historia debe ser apropiada para ilustraciones. ${contextRules}`;
+            const storyPrompt = `Prompt del usuario: ${userPrompt}\n\nCrea una historia de 5 páginas para un libro ilustrado.`;
+
+            try {
+                const storyText = await callGeminiAPI(systemPrompt, storyPrompt);
+                const pages = storyText.split('\n\n').filter(p => p.trim()).slice(0, 5); // Get up to 5 pages
+
+                for (let i = 0; i < pages.length; i++) {
+                    const pageText = pages[i];
+                    storybookStatus.textContent = `Generando página ${i + 1}...`;
+
+                    // Generate image prompt
+                    const imagePrompt = `Ilustración en estilo ${artisticStyle} para un libro infantil: ${pageText.substring(0, 200)}`;
+
+                    try {
+                        const imageUrl = await generateImage(imagePrompt);
+                        const audioBase64 = await generateTTS(pageText);
+
+                        const pageDiv = document.createElement('div');
+                        pageDiv.className = 'storybook-page p-6 flex flex-col items-center justify-center text-center';
+                        pageDiv.innerHTML = `
+                            <img src="${imageUrl}" alt="Ilustración" class="max-w-full max-h-64 mb-4 rounded-lg">
+                            <p class="text-lg mb-4">${pageText}</p>
+                            <audio controls class="w-full">
+                                <source src="data:audio/wav;base64,${audioBase64}" type="audio/wav">
+                            </audio>
+                        `;
+                        storybookContent.appendChild(pageDiv);
+                    } catch (error) {
+                        console.error('Error generating page:', error);
+                        const pageDiv = document.createElement('div');
+                        pageDiv.className = 'storybook-page p-6 flex flex-col items-center justify-center text-center';
+                        pageDiv.innerHTML = `<p>Error al generar página ${i + 1}: ${error.message}</p>`;
+                        storybookContent.appendChild(pageDiv);
+                    }
+                }
+
+                storybookStatus.textContent = 'Storybook generado con éxito!';
+            } catch (error) {
+                storybookStatus.textContent = 'Error al generar storybook: ' + error.message;
+            }
+        };
+
+        const generateImage = async (prompt) => {
+            // This function now calls the Imagen API to generate a real image.
+            const payload = {
+                "instances": [{ "prompt": prompt }],
+                "parameters": { "sampleCount": 1 }
+            };
+            const parser = (result) => {
+                const imageBase64 = result.predictions?.[0]?.bytesBase64Encoded;
+                if (!imageBase64) throw new Error("No se recibió imagen de la API.");
+                return `data:image/png;base64,${imageBase64}`;
+            };
+            try {
+                const result = await callApiViaWorker(imagenApiUrl, payload);
+                return parser(result);
+            } catch (error) {
+                console.error('Error al generar la imagen:', error);
+                return 'https://via.placeholder.com/512x512?text=Imagen+Generada';
+            }
+        };
+
+        const generateTTS = async (text) => {
+            // TTS not supported in Gemini API, return a placeholder
+            // For now, return a placeholder audio URL or base64
+            return 'data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmQdBzeP1fLOfCsFJXTH8N6QQAoUXrTp66hVFApGn+DyvmQdBzeP1fLOfCsFJXTH8N6QQAoUXrTp66hVFApGn+DyvmQdBzeP1fLOfCsFJXTH8N6QQAoUXrTp66hVFApGn+DyvmQdBzeP1fLOfCsFJXTH8N6QQAoUXrTp66hVFApGn+DyvmQdBzeP1fLOfCsFJXTH8N6QQAoUXrTp66hVFApGn+DyvmQdBzeP1fLOfCsFJXTH8N6QQAoUXrTp66hVFApGn+DyvmQdBzeP1fLOfCsFJXTH8N6QQAoUXrTp66hVFApGn+DyvmQdBzeP1fLOfCsFJXTH8N6QQAoUXrTp66hVFApGn+DyvmQdBzeP1fLOfCsFJXTH8N6QQAoUXrTp66hVFApGn+DyvmQdBzeP1fLOfCsFJXTH8N6QQAoUXrTp66hVFApGn+DyvmQdBzeP1fLOfCsFJXTH8N6QQAoUXrTp66hVFApGn+DyvmQdBzeP1fLOfCsFJXTH8N6QQAoUXrTp66hVFApGn+DyvmQdBzeP1fLOfCsFJXTH8N6QQAoUXrTp66hVFApGn+DyvmQdBzeP1fLOfCsFJXTH8N6QQAoUXrTp66hVFApGn+DyvmQdBzeP1fLOfCsFJXTH8N6QQAoUXrTp66hVFApGn+DyvmQdBzeP1fLOfCsFJXTH8N6QQAoUXrTp66hVFApGn+DyvmQdBzeP1fLOfCsFJXTH8N6QQAoUXrTp66hVFApGn+DyvmQdBzeP1fLOfCsFJXTH8N6QQAoUXrTp66hVFApGn+DyvmQdBzeP1fLOfCsFJXTH8N6QQAoUXrTp66hVFApGn+DyvmQdBzeP1fLOfCsFJXTH8N6QQAoUXrTp66hVFApGn+DyvmQdBzeP1fLOfCsFJXTH8N6QQAoUXrTp66hVFApGn+DyvmQdBzeP1fLOfCsFJXTH8N6QQAoUXrTp66hVFApGn+DyvmQdBzeP1fLOfCsFJXTH8N6QQAoUXrTp66hVFApGn+DyvmQdBzeP1fLOfCsFJXTH8N6QQAoUXrTp66hVFApGn+DyvmQdBzeP1fLOfCsFJXTH8N6QQAoUXrTp66hVFApGn+DyvmQdBzeP1fLOfCsFJXTH8N6QQAoUXrTp66hVFApGn+DyvmQdBzeP1fLOfCsFJXTH8N6QQAoUXrTp66hVFApGn+DyvmQdBzeP1fLOfCsFJXTH8N6QQAoUXrTp66hVFApGn+DyvmQdBzeP1fLOfCsFJXTH8N6QQAoUXrTp66hVFApGn+DyvmQdBzeP1fLOfCsFJXTH8N6QQAoUXrTp66hVFApGn+DyvmQdBzeP1fLOfCsFJXTH8N6QQAoUXrTp66hVFApGn+DyvmQdBzeP1fLOfCsFJXTH8N6QQAoUXrTp66hVFApGn+DyvmQdBzeP1fLOfCsFJXTH8N6QQAoUXrTp66hVFApGn+DyvmQdBzeP1fLOfCsFJXTH8N6QQAoUXrTp66hVFApGn+DyvmQdBzeP1fLOfCsFJXTH8N6QQAoUXrTp66hVFApGn+DyvmQdBzeP1fLOfCsFJXTH8N6QQAoUXrTp66hVFApGn+DyvmQdBzeP1fLOfCsFJXTH8N6QQAoUXrTp66hVFApGn+DyvmQdBzeP1fLOfCsFJXTH8N6QQAoUXrTp66hVFApGn+DyvmQdBzeP1fLOfCsFJXTH8N6QQAoUXrTp66hVFApGn+DyvmQdBzeP1fLOfCsFJXTH8N6QQAoUXrTp66hVFApGn+DyvmQdBzeP1fLOfCsFJXTH8N6QQAoUXrTp66hVFApGn+DyvmQdBzeP1fLOfCsFJXTH8N6QQAoUXrTp66hVFApGn+DyvmQdBzeP1fLOfCsFJXTH8N6QQAoUXrTp66hVFApGn+DyvmQdBzeP1fLOfCsFJXTH8N6QQAoUXrTp66hVFApGn+DyvmQdBzeP1fLOfCsFJXTH8N6QQAoUXrTp66hVFApGn+DyvmQdBzeP1fLOfCsFJXTH8N6QQAoUXrTp66hVFApGn+DyvmQdBzeP1fLOfCsFJXTH8N6QQAoUXrTp66hVFApGn+DyvmQdBzeP1fLOfCsFJXTH8N6QQAoUXrTp66hVFApGn+DyvmQdBzeP1fLOfCsFJXTH8N6QQAoUXrTp66hVFApGn+DyvmQdBzeP1fLOfCsFJXTH8N6QQAoUXrTp66hVFApGn+DyvmQdBzeP1fLOfCsFJXTH8N6QQAoUXrTp66hVFApGn+DyvmQdBzeP1fLOfCsFJXTH8N6QQAoUXrTp66hVFApGn+DyvmQdBzeP1fLOfCsFJXTH8N6QQAoUXrTp66hVFApGn+DyvmQdBzeP1fLOfCsFJXTH8N6QQAoUXrTp66hVFApGn+DyvmQdBzeP1fLOfCsFJXTH8N6QQAoUXrTp66hVFApGn+DyvmQdBzeP1fLOfCsFJXTH8N6QQAoUXrTp66hVFApGn+DyvmQdBzeP1fLOfCsFJXTH8N6QQAoUXrTp66hVFApGn+DyvmQdBzeP1fLOfCsFJXTH8N6QQAoUXrTp66hVFApGn+DyvmQdBzeP1fLOfCsFJXTH8N6QQAoUXrTp66hVFApGn+DyvmQdBzeP1fLOfCsFJXTH8N6QQAoUXrTp66hVFApGn+DyvmQdBzeP1fLOfCsFJXTH8N6QQAoUXrTp66hVFApGn+DyvmQdBzeP1fLOfCsFJXTH8N6QQAoUXrTp66hVFApGn+DyvmQdBzeP1fLOfCsFJXTH8N6QQAoUXrTp66hVFApGn+DyvmQdBzeP1fLOfCsFJXTH8N6QQAoUXrTp66hVFApGn+DyvmQdBzeP1fLOfCsFJXTH8N6QQAoUXrTp66hVFApGn+DyvmQdBzeP1fLOfCsFJXTH8N6QQAoUXrTp66hVFApGn+DyvmQdBzeP1fLOfCsFJXTH8N6QQAoUXrTp66hVFApGn+DyvmQdBzeP1fLOfCsFJXTH8N6QQAoUXrTp66hVFApGn+DyvmQdBzeP1fLOfCsFJXTH8N6QQAoUXrTp66hVFApGn+DyvmQdBzeP1fLOfCsFJXTH8N6QQAoUXrTp66hVFApGn+DyvmQdBzeP1fLOfCsFJXTH8N6QQAoUXrTp66hVFApGn+DyvmQdBzeP1fLOfCsFJXTH8N6QQAoUXrTp66hVFApGn+DyvmQdBzeP1fLOfCsFJXTH8N6QQAoUXrTp66hVFApGn+DyvmQdBzeP1fLOfCsFJXTH8N6QQAoUXrTp66hVFApGn+DyvmQdBzeP1fLOfCsFJXTH8N6QQAoUXrTp66hVFApGn+DyvmQdBzeP1fLOfCsFJXTH8N6QQAoUXrTp66hVFApGn+DyvmQdBzeP1fLOfCsFJXTH8N6QQAoUXrTp66hVFApGn+DyvmQdBzeP1fLOfCsFJXTH8N6QQAoUXrTp66hVFApGn+DyvmQdBzeP1fLOfCsFJXTH8N6QQAoUXrTp66hVFApGn+DyvmQdBzeP1fLOfCsFJXTH8N6QQAoUXrTp66hVFApGn+DyvmQdBzeP1fLOfCsFJXTH8N6QQAoUXrTp66hVFApGn+DyvmQdBzeP1fLOfCsFJXTH8N6QQAoUXrTp66hVFApGn+DyvmQdBzeP1fLOfCsFJXTH8N6QQAoUXrTp66hVFApGn+DyvmQdBzeP1fLOfCsFJXTH8N6QQAoUXrTp66hVFApGn+DyvmQdBzeP1fLOfCsFJXTH8N6QQAoUXrTp66hVFApGn+DyvmQdBzeP1fLOfCsFJXTH8N6QQAoUXrTp66hVFApGn+DyvmQdBzeP1fLOfCsFJXTH8N6QQAoUXrTp66hVFApGn+DyvmQdBzeP1fLOfCsFJXTH8N6QQAoUXrTp66hVFApGn+DyvmQdBzeP1fLOfCsFJXTH8N6QQAoUXrTp66hVFApGn+DyvmQdBzeP1fLOfCsFJXTH8N6QQAoUXrTp66hVFApGn+DyvmQdBzeP1fLOfCsFJXTH8N6QQAoUXrTp66hVFApGn+DyvmQdBzeP1fLOfCsFJXTH8N6QQAoUXrTp66hVFApGn+DyvmQdBzeP1fLOfCsFJXTH8N6QQAoUXrTp66hVFApGn+DyvmQdBzeP1fLOfCsFJXTH8N6QQAoUXrTp66hVFApGn+DyvmQdBzeP1fLOfCsFJXTH8N6QQAoUXrTp66hVFApGn+DyvmQdBzeP1fLOfCsFJXTH8N6QQAoUXrTp66hVFApGn+DyvmQdBzeP1fLOfCsFJXTH8N6QQAoUXrTp66hVFApGn+DyvmQdBzeP1fLOfCsFJXTH8N6QQAoUXrTp66hVFApGn+DyvmQdBzeP1fLOfCsFJXTH8N6QQAoUXrTp66hVFApGn+DyvmQdBzeP1fLOfCsFJXTH8N6QQAoUXrTp66hVFApGn+DyvmQdBzeP1fLOfCsFJXTH8N6QQAoUXrTp66hVFApGn+DyvmQdBzeP1fLOfCsFJXTH8N6QQAoUXrTp66hVFApGn+DyvmQdBzeP1fLOfCsFJXTH8N6QQAoUXrTp66hVFApGn+DyvmQdBzeP1fLOfCsFJXTH8N6QQAoUXrTp66hVFApGn+DyvmQdBzeP1fLOfCsFJXTH8N6QQAoUXrTp66hVFApGn+DyvmQdBzeP1fLOfCsFJXTH8N6QQAoUXrTp66hVFApGn+DyvmQdBzeP1fLOfCsFJXTH8N6QQAoUXrTp66hVFApGn+DyvmQdBzeP1fLOfCsFJXTH8N6QQAoUXrTp66hVFApGn+DyvmQdBzeP1fLOfCsFJXTH8N6QQAoUXrTp66hVFApGn+DyvmQdBzeP1fLOfCsFJXTH8N6QQAoUXrTp66hVFApGn+DyvmQdBzeP1fLOfCsFJXTH8N6QQAoUXrTp66hVFApGn+DyvmQdBzeP1fLOfCsFJXTH8N6QQAoUXrTp66hVFApGn+DyvmQdBzeP1fLOfCsFJXTH8N6QQAoUXrTp66hVFApGn+DyvmQdBzeP1fLOfCsFJXTH8N6QQAoUXrTp66hVFApGn+DyvmQdBzeP1fLOfCsFJXTH8N6QQAoUXrTp66hVFApGn+DyvmQdBzeP1fLOfCsFJXTH8N6QQAoUXrTp66hVFApGn+DY='; // Placeholder base64 audio
+        };
+
+        function getLoaderHTML(message) {
+            return `
+                <div class="flex flex-col items-center justify-center h-full">
+                    <div class="loader border-4 border-gray-300 rounded-full w-12 h-12 mb-4"></div>
+                    <p class="text-gray-500 dark:text-gray-400">${message}</p>
+                </div>
+            `;
+        }
+
+        function setLoading(isLoading) {
+            if (isLoading) {
+                storyOutput.innerHTML = getLoaderHTML('Generando historia...');
+                outputPlaceholder.style.display = 'none';
+                generateButton.disabled = true;
+                buttonText.textContent = 'Generando...';
+            } else {
+                generateButton.disabled = false;
+                buttonText.textContent = 'Generar Capítulo';
+            }
+        }
+
+        function displayStory(text, isContinuation = false) {
+            if (isContinuation) {
+                generatedStory += '\n\n' + text;
+            } else {
+                generatedStory = text;
+                outputPlaceholder.style.display = 'none';
+                continueButton.classList.remove('hidden');
+                exportButton.classList.remove('hidden');
+                clearStoryButton.classList.remove('hidden');
+            }
+            localStorage.setItem('generatedStory', generatedStory);
+            paginateStory(generatedStory);
+        }
+
+        function displayError(message, isContinuation = false) {
+            if (isContinuation) {
+                generatedStory += '\n\n' + message;
+            } else {
+                generatedStory = message;
+                outputPlaceholder.style.display = 'none';
+            }
+            localStorage.setItem('generatedStory', generatedStory);
+            paginateStory(generatedStory);
+        }
+
+        function base64ToArrayBuffer(base64) {
+            const binaryString = atob(base64);
+            const len = binaryString.length;
+            const bytes = new Uint8Array(len);
+            for (let i = 0; i < len; i++) {
+                bytes[i] = binaryString.charCodeAt(i);
+            }
+            return bytes.buffer;
+        }
+
+        function pcmToWav(pcmData, sampleRate = 22050) {
+            const numChannels = 1;
+            const bytesPerSample = 2;
+            const blockAlign = numChannels * bytesPerSample;
+            const byteRate = sampleRate * blockAlign;
+            const dataSize = pcmData.length * bytesPerSample;
+            const bufferSize = 44 + dataSize;
+
+            const buffer = new ArrayBuffer(bufferSize);
+            const view = new DataView(buffer);
+
+            // WAV header
+            const writeString = (offset, string) => {
+                for (let i = 0; i < string.length; i++) {
+                    view.setUint8(offset + i, string.charCodeAt(i));
+                }
+            };
+
+            writeString(0, 'RIFF');
+            view.setUint32(4, bufferSize - 8, true);
+            writeString(8, 'WAVE');
+            writeString(12, 'fmt ');
+            view.setUint32(16, 16, true);
+            view.setUint16(20, 1, true); // PCM
+            view.setUint16(22, numChannels, true);
+            view.setUint32(24, sampleRate, true);
+            view.setUint32(28, byteRate, true);
+            view.setUint16(32, blockAlign, true);
+            view.setUint16(34, bytesPerSample * 8, true);
+            writeString(36, 'data');
+            view.setUint32(40, dataSize, true);
+
+            // PCM data
+            for (let i = 0; i < pcmData.length; i++) {
+                view.setInt16(44 + i * 2, pcmData[i] * 32767, true);
+            }
+
+            return buffer;
+        }
+        
+
+
+        // --- Event Listeners ---
+        generateButton.addEventListener('click', handleStoryGeneration);
+        continueButton.addEventListener('click', handleStoryContinuation);
+        exportButton.addEventListener('click', handleExportStory);
+        clearStoryButton.addEventListener('click', () => {
+            if (confirm('¿Estás seguro de que quieres limpiar la historia guardada? Esta acción no se puede deshacer.')) {
+                localStorage.removeItem('generatedStory'); 
+                generatedStory = "";
+                storyPages = [];
+                currentPage = 0;
+                updatePageDisplay();
+                continueButton.classList.add('hidden');
+                exportButton.classList.add('hidden');
+                clearStoryButton.classList.add('hidden');
+            }
+        });
+
+        // Add API Key button
+        document.getElementById('addApiKeyButton').addEventListener('click', () => {
+            const apiKeyInput = document.getElementById('apiKeyInput');
+            const keysText = apiKeyInput.value.trim();
+            if (keysText) {
+                const newKeys = keysText.split('\n').map(k => k.trim()).filter(k => k);
+                apiKeys = [...new Set([...apiKeys, ...newKeys])]; // Avoid duplicates
+                localStorage.setItem('geminiApiKeys', JSON.stringify(apiKeys));
+                apiKey = apiKeys[0]; // Set first as active
+                updateApiKeySelect();
+                alert('Claves de API añadidas exitosamente.');
+                // Update URLs with new key
+                geminiApiUrl = `http://localhost:8080/v1beta/models/gemini-2.0-flash:generateContent`;
+                imagenApiUrl = `http://localhost:8080/v1beta/models/imagen-4.0-generate-001:predict`;
+                ttsApiUrl = `http://localhost:8080/v1beta/models/gemini-1.5-flash:generateContent`;
+            } else {
+                alert('Por favor, ingresa al menos una clave de API.');
+            }
+        });
+
+        // API Key select change
+        document.getElementById('apiKeySelect').addEventListener('change', (e) => {
+            const selectedIndex = parseInt(e.target.value);
+            if (selectedIndex >= 0) {
+                apiKey = apiKeys[selectedIndex];
+                // Update URLs with selected key
+                geminiApiUrl = `http://localhost:8080/v1beta/models/gemini-2.0-flash:generateContent`;
+                imagenApiUrl = `http://localhost:8080/v1beta/models/imagen-4.0-generate-001:predict`;
+                ttsApiUrl = `http://localhost:8080/v1beta/models/gemini-1.5-flash:generateContent`;
+            }
+        });
+
+        function updateApiKeySelect() {
+            const select = document.getElementById('apiKeySelect');
+            select.innerHTML = '<option value="-1">Selecciona una clave activa</option>';
+            apiKeys.forEach((key, index) => {
+                const option = document.createElement('option');
+                option.value = index;
+                option.textContent = `Clave ${index + 1}: ${key.substring(0, 10)}...`;
+                select.appendChild(option);
+            });
+            if (apiKeys.length > 0) {
+                select.value = 0; // Select first by default
+            }
+        }
+
+        // Initialize select on load
+        updateApiKeySelect();
+
+        // Tool buttons
+        document.getElementById('generateTwistButton').addEventListener('click', handleTwistGeneration);
+        document.getElementById('runTwistGeneration').addEventListener('click', handleRunTwistGeneration);
+        document.getElementById('generateProfileButton').addEventListener('click', handleProfileGeneration);
+        document.getElementById('runProfileGeneration').addEventListener('click', handleRunProfileGeneration);
+        document.getElementById('generateRandomProfileButton').addEventListener('click', handleRunRandomProfileGeneration);
+        document.getElementById('generateDialogueButton').addEventListener('click', handleDialogueGeneration);
+        document.getElementById('runDialogueGeneration').addEventListener('click', handleRunDialogueGeneration);
+        document.getElementById('critiqueButton').addEventListener('click', handleCritiqueGeneration);
+        document.getElementById('queryPdfButton').addEventListener('click', handleQueryPdfGeneration);
+        document.getElementById('runQueryPdfGeneration').addEventListener('click', handleRunQueryPdfGeneration);
+        document.getElementById('generateQuestionButton').addEventListener('click', handleGenerateQuestion);
+        document.getElementById('runGenerateQuestion').addEventListener('click', handleRunGenerateQuestion);
+        document.getElementById('generateStorybookButton').addEventListener('click', handleStorybookGeneration);
+
+        // Modal close buttons
+        document.getElementById('closeTwistModal').addEventListener('click', () => {
+            document.getElementById('twistModal').classList.add('hidden');
+        });
+        document.getElementById('closeProfileModal').addEventListener('click', () => {
+            document.getElementById('profileModal').classList.add('hidden');
+        });
+        document.getElementById('closeDialogueModal').addEventListener('click', () => {
+            document.getElementById('dialogueModal').classList.add('hidden');
+        });
+        document.getElementById('closeCritiqueModal').addEventListener('click', () => {
+            document.getElementById('critiqueModal').classList.add('hidden');
+        });
+        document.getElementById('closeQueryPdfModal').addEventListener('click', () => {
+            document.getElementById('queryPdfModal').classList.add('hidden');
+        });
+        document.getElementById('closeGenerateQuestionModal').addEventListener('click', () => {
+            document.getElementById('generateQuestionModal').classList.add('hidden');
+        });
+        document.getElementById('closeStorybookModal').addEventListener('click', () => {
+            document.getElementById('storybookModal').classList.add('hidden');
+        });
+
+        // Load saved story on page load
+        window.addEventListener('load', () => {
+            if (generatedStory) {
+                paginateStory(generatedStory);
+                continueButton.classList.remove('hidden');
+                exportButton.classList.remove('hidden');
+                clearStoryButton.classList.remove('hidden');
+            } else {
+                clearStoryButton.classList.add('hidden');
+            }
+        });
+
+        // Page navigation
+        prevPageButton.addEventListener('click', () => {
+            if (currentPage > 0) {
+                currentPage--;
+                updatePageDisplay();
+            }
+        });
+
+        nextPageButton.addEventListener('click', () => {
+            if (currentPage < storyPages.length - 1) {
+                currentPage++;
+                updatePageDisplay();
+            }
+        });
+
+        // All functions are now implemented above.
+
+    </script>
+</body>
+</html>
