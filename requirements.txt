@@ -2,3 +2,7 @@ flask
 flask-cors
 httpx
 google-generativeai
+flask-sqlalchemy
+flask-login
+cryptography
+werkzeug

@@ -151,12 +151,22 @@
                 Tu asistente de IA para crear increíbles historias y fanfics.
             </p>
              <div class="mt-4 text-center">
-                 <label for="apiKeyInput" class="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">Claves de API de Gemini (requeridas para las herramientas)</label>
-                 <textarea id="apiKeyInput" placeholder="Pega tus claves de API aquí, una por línea" class="form-input max-w-md mx-auto" rows="3"></textarea>
-                 <button id="addApiKeyButton" class="btn btn-primary mt-2 mr-2">Añadir Clave</button>
-                 <select id="apiKeySelect" class="form-select max-w-md mx-auto mt-2">
-                     <option value="-1">Selecciona una clave activa</option>
-                 </select>
+                 <div id="authSection">
+                     <button id="loginButton" class="btn btn-primary mr-2">Iniciar Sesión</button>
+                     <button id="signupButton" class="btn btn-green">Registrarse</button>
+                 </div>
+                 <div id="userSection" class="hidden">
+                     <span id="userGreeting" class="text-gray-700 dark:text-gray-300 mr-2"></span>
+                     <button id="logoutButton" class="btn btn-yellow">Cerrar Sesión</button>
+                 </div>
+                 <div id="apiSection" class="mt-4 hidden">
+                     <label for="apiKeyInput" class="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">Claves de API de Gemini (requeridas para las herramientas)</label>
+                     <textarea id="apiKeyInput" placeholder="Pega tus claves de API aquí, una por línea" class="form-input max-w-md mx-auto" rows="3"></textarea>
+                     <button id="addApiKeyButton" class="btn btn-primary mt-2 mr-2">Añadir Clave</button>
+                     <select id="apiKeySelect" class="form-select max-w-md mx-auto mt-2">
+                         <option value="-1">Selecciona una clave activa</option>
+                     </select>
+                 </div>
              </div>
         </header>
 
@@ -462,6 +472,37 @@
             </div>
             <div id="storybookStatus" class="p-4 text-center text-gray-500 border-t border-gray-200 dark:border-gray-700">
             </div>
+        </div>
+    </div>
+
+    <div id="loginModal" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center p-4 hidden z-50">
+        <div class="card max-w-md w-full p-6">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-2xl font-bold text-gray-900 dark:text-white">Iniciar Sesión</h2>
+                <button id="closeLoginModal" class="text-gray-400 hover:text-gray-900 dark:hover:text-white text-3xl transition duration-200">&times;</button>
+            </div>
+            <form id="loginForm">
+                <input type="text" id="loginUsername" placeholder="Usuario" class="form-input mb-2" required>
+                <input type="password" id="loginPassword" placeholder="Contraseña" class="form-input mb-4" required>
+                <button type="submit" class="btn btn-primary w-full">Iniciar Sesión</button>
+            </form>
+            <p class="text-center mt-4">¿No tienes cuenta? <a href="#" id="switchToSignup" class="text-primary-500">Regístrate</a></p>
+        </div>
+    </div>
+
+    <div id="signupModal" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center p-4 hidden z-50">
+        <div class="card max-w-md w-full p-6">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-2xl font-bold text-gray-900 dark:text-white">Registrarse</h2>
+                <button id="closeSignupModal" class="text-gray-400 hover:text-gray-900 dark:hover:text-white text-3xl transition duration-200">&times;</button>
+            </div>
+            <form id="signupForm">
+                <input type="text" id="signupUsername" placeholder="Usuario" class="form-input mb-2" required>
+                <input type="email" id="signupEmail" placeholder="Correo electrónico" class="form-input mb-2" required>
+                <input type="password" id="signupPassword" placeholder="Contraseña" class="form-input mb-4" required>
+                <button type="submit" class="btn btn-green w-full">Registrarse</button>
+            </form>
+            <p class="text-center mt-4">¿Ya tienes cuenta? <a href="#" id="switchToLogin" class="text-primary-500">Inicia sesión</a></p>
         </div>
     </div>
 
@@ -1187,20 +1228,38 @@
         });
 
         // Add API Key button
-        document.getElementById('addApiKeyButton').addEventListener('click', () => {
+        document.getElementById('addApiKeyButton').addEventListener('click', async () => {
+            if (!isLoggedIn) {
+                alert('Debes iniciar sesión para guardar claves de API.');
+                return;
+            }
             const apiKeyInput = document.getElementById('apiKeyInput');
             const keysText = apiKeyInput.value.trim();
             if (keysText) {
                 const newKeys = keysText.split('\n').map(k => k.trim()).filter(k => k);
                 apiKeys = [...new Set([...apiKeys, ...newKeys])]; // Avoid duplicates
-                localStorage.setItem('geminiApiKeys', JSON.stringify(apiKeys));
-                apiKey = apiKeys[0]; // Set first as active
-                updateApiKeySelect();
-                alert('Claves de API añadidas exitosamente.');
-                // Update URLs with new key
-                geminiApiUrl = `http://localhost:8080/v1beta/models/gemini-2.0-flash:generateContent`;
-                imagenApiUrl = `http://localhost:8080/v1beta/models/imagen-4.0-generate-001:predict`;
-                ttsApiUrl = `http://localhost:8080/v1beta/models/gemini-1.5-flash:generateContent`;
+                try {
+                    const response = await fetch('http://localhost:8080/api/user/keys', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        credentials: 'include',
+                        body: JSON.stringify({ keys: apiKeys })
+                    });
+                    if (response.ok) {
+                        apiKey = apiKeys[0]; // Set first as active
+                        updateApiKeySelect();
+                        alert('Claves de API guardadas exitosamente.');
+                        // Update URLs with new key
+                        geminiApiUrl = `http://localhost:8080/v1beta/models/gemini-2.0-flash:generateContent`;
+                        imagenApiUrl = `http://localhost:8080/v1beta/models/imagen-4.0-generate-001:predict`;
+                        ttsApiUrl = `http://localhost:8080/v1beta/models/gemini-1.5-flash:generateContent`;
+                    } else {
+                        alert('Error al guardar las claves de API.');
+                    }
+                } catch (error) {
+                    console.error('Error saving API keys:', error);
+                    alert('Error al guardar las claves de API.');
+                }
             } else {
                 alert('Por favor, ingresa al menos una clave de API.');
             }
@@ -1234,6 +1293,143 @@
 
         // Initialize select on load
         updateApiKeySelect();
+
+        // Authentication functions
+        async function checkAuthStatus() {
+            try {
+                const response = await fetch('http://localhost:8080/', { credentials: 'include' });
+                const data = await response.json();
+                if (data.user) {
+                    isLoggedIn = true;
+                    document.getElementById('authSection').classList.add('hidden');
+                    document.getElementById('userSection').classList.remove('hidden');
+                    document.getElementById('userGreeting').textContent = `Hola, ${data.user}!`;
+                    document.getElementById('apiSection').classList.remove('hidden');
+                    loadUserApiKeys();
+                } else {
+                    isLoggedIn = false;
+                    document.getElementById('authSection').classList.remove('hidden');
+                    document.getElementById('userSection').classList.add('hidden');
+                    document.getElementById('apiSection').classList.add('hidden');
+                }
+            } catch (error) {
+                console.error('Error checking auth status:', error);
+            }
+        }
+
+        async function loadUserApiKeys() {
+            try {
+                const response = await fetch('http://localhost:8080/api/user/keys', { credentials: 'include' });
+                if (response.ok) {
+                    const data = await response.json();
+                    apiKeys = data.keys || [];
+                    apiKey = apiKeys.length > 0 ? apiKeys[0] : "";
+                    updateApiKeySelect();
+                }
+            } catch (error) {
+                console.error('Error loading API keys:', error);
+            }
+        }
+
+        // Login form handler
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const username = document.getElementById('loginUsername').value;
+            const password = document.getElementById('loginPassword').value;
+
+            try {
+                const response = await fetch('http://localhost:8080/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    credentials: 'include',
+                    body: new URLSearchParams({ username, password })
+                });
+                const data = await response.json();
+                if (data.success) {
+                    document.getElementById('loginModal').classList.add('hidden');
+                    checkAuthStatus();
+                } else {
+                    alert(data.message);
+                }
+            } catch (error) {
+                console.error('Login error:', error);
+                alert('Error al iniciar sesión.');
+            }
+        });
+
+        // Signup form handler
+        document.getElementById('signupForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const username = document.getElementById('signupUsername').value;
+            const email = document.getElementById('signupEmail').value;
+            const password = document.getElementById('signupPassword').value;
+
+            try {
+                const response = await fetch('http://localhost:8080/signup', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    credentials: 'include',
+                    body: new URLSearchParams({ username, email, password })
+                });
+                const data = await response.json();
+                if (data.success) {
+                    document.getElementById('signupModal').classList.add('hidden');
+                    checkAuthStatus();
+                } else {
+                    alert(data.message);
+                }
+            } catch (error) {
+                console.error('Signup error:', error);
+                alert('Error al registrarse.');
+            }
+        });
+
+        // Logout handler
+        document.getElementById('logoutButton').addEventListener('click', async () => {
+            try {
+                await fetch('http://localhost:8080/logout', { credentials: 'include' });
+                checkAuthStatus();
+            } catch (error) {
+                console.error('Logout error:', error);
+            }
+        });
+
+        // Modal handlers
+        document.getElementById('loginButton').addEventListener('click', () => {
+            document.getElementById('loginModal').classList.remove('hidden');
+        });
+        document.getElementById('signupButton').addEventListener('click', () => {
+            document.getElementById('signupModal').classList.remove('hidden');
+        });
+        document.getElementById('closeLoginModal').addEventListener('click', () => {
+            document.getElementById('loginModal').classList.add('hidden');
+        });
+        document.getElementById('closeSignupModal').addEventListener('click', () => {
+            document.getElementById('signupModal').classList.add('hidden');
+        });
+        document.getElementById('switchToSignup').addEventListener('click', (e) => {
+            e.preventDefault();
+            document.getElementById('loginModal').classList.add('hidden');
+            document.getElementById('signupModal').classList.remove('hidden');
+        });
+        document.getElementById('switchToLogin').addEventListener('click', (e) => {
+            e.preventDefault();
+            document.getElementById('signupModal').classList.add('hidden');
+            document.getElementById('loginModal').classList.remove('hidden');
+        });
+
+        // Check auth status on load
+        window.addEventListener('load', () => {
+            checkAuthStatus();
+            if (generatedStory) {
+                paginateStory(generatedStory);
+                continueButton.classList.remove('hidden');
+                exportButton.classList.remove('hidden');
+                clearStoryButton.classList.remove('hidden');
+            } else {
+                clearStoryButton.classList.add('hidden');
+            }
+        });
 
         // Tool buttons
         document.getElementById('generateTwistButton').addEventListener('click', handleTwistGeneration);
